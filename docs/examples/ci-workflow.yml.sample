@@ -1,0 +1,29 @@
+# GitHub Actions CIの例（PRごとに自動テスト/lint）
+# 置き場所：リポジトリの .github/workflows/ci.yml
+# 役割：PRが作られた／更新されたら、自動でテストと文法チェックを走らせる。
+#       ブランチ保護の「必須チェック」に指定すると、通らないとマージできない＝品質ゲートになる。
+# 注意：下は Node.js の例。自分のプロジェクトのコマンドに置き換える
+#       （Python例: ruff check . と pytest -q ／ Go例: go vet ./... と go test ./...）。
+
+name: CI
+
+on:
+  pull_request:        # PRが作られた/更新されたとき
+  push:
+    branches: [ main ] # mainへのpush時も（保護していれば実質マージ時）
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run lint --silent     # 文法チェック（lint）
+      - run: npm test --silent         # テスト
+
+# このワークフローのジョブ名（例: test）を、
+# GitHubの「ブランチ保護 → 必須のステータスチェック」に指定すると、
+# テストが通るまで main にマージできなくなる。

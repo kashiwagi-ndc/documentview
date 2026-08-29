@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI駆動アジャイル開発 実践ガイド＆運用マニュアル</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root{
+  --color-primary:#0066FF;
+  --color-accent:#FF6B35;
+  --color-text:#1A1A1A;
+  --color-text-sub:#666666;
+  --color-bg:#FFFFFF;
+  --color-bg-sub:#F5F5F5;
+  --color-border:#E0E0E0;
+  --radius-sm:4px;
+  --radius-md:8px;
+  --space-xs:0.5rem;
+  --space-sm:1rem;
+  --space-md:2rem;
+  --space-lg:4rem;
+  --sidebar-w:264px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  color:var(--color-text);
+  line-height:1.8;
+  letter-spacing:0.03em;
+  background:var(--color-bg);
+}
+h1,h2,h3,h4{word-break:keep-all;overflow-wrap:break-word;line-height:1.4;}
+
+/* ===== サイドバー ===== */
+.sidebar{
+  position:fixed;top:0;left:0;
+  width:var(--sidebar-w);height:100vh;
+  background:var(--color-text);
+  color:var(--color-bg);
+  padding:var(--space-md) 0;
+  overflow-y:auto;
+  z-index:100;
+}
+.sidebar__brand{
+  padding:0 var(--space-md) var(--space-md);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  margin-bottom:var(--space-sm);
+}
+.sidebar__brand .material-icons{color:var(--color-accent);font-size:1.6rem;vertical-align:middle;}
+.sidebar__brand b{font-size:1.05rem;font-weight:900;display:block;margin-top:var(--space-xs);}
+.sidebar__brand span{font-size:0.72rem;color:#AAB;}
+.sidebar__menu{list-style:none;}
+.sidebar__menu li a{
+  display:flex;align-items:center;gap:0.6rem;
+  padding:0.7rem var(--space-md);
+  color:#D5D9E0;text-decoration:none;font-size:0.9rem;font-weight:700;
+  border-left:3px solid transparent;transition:all .2s ease;
+}
+.sidebar__menu li a .material-icons{font-size:1.15rem;color:var(--color-primary);}
+.sidebar__menu li a:hover,.sidebar__menu li a.active{
+  background:rgba(0,102,255,0.14);color:#fff;border-left-color:var(--color-accent);
+}
+.sidebar__group{padding:0.9rem var(--space-md) 0.25rem;font-size:0.66rem;font-weight:700;color:#7E8794;letter-spacing:0.1em;text-transform:none;border-top:1px solid rgba(255,255,255,0.07);margin-top:0.3rem;}
+.sidebar__menu li:first-child.sidebar__group{border-top:none;margin-top:0;}
+.sidebar__foot{padding:var(--space-md);font-size:0.72rem;color:#B8BEC8;}
+
+/* ===== メイン ===== */
+.main{margin-left:var(--sidebar-w);}
+.section{padding:var(--space-lg) var(--space-md);max-width:1080px;}
+.section:nth-child(even){background:var(--color-bg-sub);}
+.section__inner{max-width:1000px;}
+.eyebrow{color:var(--color-primary);font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;}
+h2{font-size:clamp(1.6rem,3vw,2.3rem);font-weight:900;margin:0.2rem 0 var(--space-sm);}
+h3{font-size:1.25rem;font-weight:700;margin:var(--space-md) 0 var(--space-sm);display:flex;align-items:center;gap:0.5rem;}
+h3 .material-icons{color:var(--color-primary);}
+p{font-size:0.95rem;margin-bottom:var(--space-sm);color:#333;}
+.lead{font-size:1.05rem;color:var(--color-text-sub);}
+
+/* hero */
+.hero{
+  margin-left:var(--sidebar-w);
+  background:var(--color-primary);color:#fff;
+  padding:var(--space-lg) var(--space-md);
+}
+.hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;margin-bottom:var(--space-sm);}
+.hero p{color:#E5EEFF;font-size:1.05rem;max-width:760px;}
+.hero__tags{margin-top:var(--space-md);display:flex;flex-wrap:wrap;gap:0.6rem;}
+.hero__tags span{background:rgba(255,255,255,0.16);padding:0.35rem 0.8rem;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:700;}
+
+/* テーブル */
+.table-wrap{overflow-x:auto;margin:var(--space-sm) 0 var(--space-md);}
+table{width:100%;border-collapse:collapse;font-size:0.86rem;background:#fff;}
+th,td{border:1px solid var(--color-border);padding:0.65rem 0.8rem;text-align:left;vertical-align:top;}
+th{background:var(--color-text);color:#fff;font-weight:700;font-size:0.82rem;white-space:nowrap;}
+tbody tr:nth-child(even){background:var(--color-bg-sub);}
+.badge{display:inline-block;background:var(--color-primary);color:#fff;font-weight:900;border-radius:var(--radius-sm);padding:0.05rem 0.5rem;font-size:0.8rem;}
+.badge--accent{background:var(--color-accent);}
+.badge--gray{background:var(--color-text-sub);}
+.tag{display:inline-block;border:1px solid var(--color-primary);color:var(--color-primary);border-radius:999px;padding:0.05rem 0.6rem;font-size:0.74rem;font-weight:700;margin:0.1rem 0.1rem 0.1rem 0;}
+code{background:#EEF2FF;color:var(--color-primary);padding:0.1rem 0.4rem;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:700;}
+
+/* フロー図 */
+.flow{display:flex;flex-direction:column;gap:0.5rem;margin:var(--space-sm) 0 var(--space-md);}
+.flow__phase{font-size:0.78rem;font-weight:700;color:var(--color-text-sub);margin-top:var(--space-sm);}
+.flow__row{display:flex;flex-wrap:wrap;align-items:stretch;gap:0.5rem;}
+.node{
+  flex:1;min-width:150px;background:#fff;border:1px solid var(--color-border);
+  border-top:4px solid var(--color-primary);border-radius:var(--radius-md);
+  padding:0.8rem;font-size:0.82rem;
+}
+.node b{display:block;font-size:0.92rem;margin-bottom:0.2rem;}
+.node small{color:var(--color-text-sub);font-size:0.74rem;}
+.node--loop{border-top-color:var(--color-accent);}
+.node--outer{border-top-color:var(--color-text);}
+.loopbox{
+  border:2px dashed var(--color-accent);border-radius:var(--radius-md);
+  padding:var(--space-sm);background:#FFF8F4;
+}
+.loopbox__label{font-size:0.78rem;font-weight:900;color:var(--color-accent);margin-bottom:0.5rem;display:flex;align-items:center;gap:0.3rem;}
+.arrow-down{text-align:center;color:var(--color-primary);font-size:1.2rem;line-height:1;}
+
+/* タイムライン */
+.timeline{display:flex;gap:0;margin:var(--space-sm) 0 var(--space-md);overflow-x:auto;}
+.tl-day{flex:1;min-width:120px;border:1px solid var(--color-border);border-right:none;background:#fff;}
+.tl-day:last-child{border-right:1px solid var(--color-border);}
+.tl-day__head{background:var(--color-primary);color:#fff;font-weight:900;font-size:0.8rem;padding:0.4rem;text-align:center;}
+.tl-day--plan .tl-day__head{background:var(--color-text);}
+.tl-day--review .tl-day__head{background:var(--color-accent);}
+.tl-day__body{padding:0.5rem;font-size:0.76rem;color:#444;min-height:90px;}
+.tl-day__body .pill{display:block;background:var(--color-bg-sub);border-radius:var(--radius-sm);padding:0.15rem 0.3rem;margin-bottom:0.25rem;font-size:0.72rem;}
+.daystrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin:var(--space-sm) 0 var(--space-md);}
+.daystrip .slot{border:1px solid var(--color-border);border-top:4px solid var(--color-primary);border-radius:var(--radius-md);padding:0.7rem;background:#fff;}
+.daystrip .slot b{display:flex;align-items:center;gap:0.3rem;font-size:0.9rem;margin-bottom:0.3rem;}
+.daystrip .slot b .material-icons{font-size:1.1rem;color:var(--color-primary);}
+.daystrip .slot small{color:var(--color-text-sub);font-size:0.73rem;}
+.daystrip .slot ul{margin:0.3rem 0 0 1rem;font-size:0.78rem;}
+
+/* 工程カード */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--space-sm);margin:var(--space-sm) 0;}
+.card{background:#fff;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);border-top:4px solid var(--color-primary);}
+.card.is-impl{border-top-color:var(--color-accent);}
+.card.is-test{border-top-color:#22A06B;}
+.card__head{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;}
+.card__num{background:var(--color-primary);color:#fff;font-weight:900;border-radius:var(--radius-sm);width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.card.is-impl .card__num{background:var(--color-accent);}
+.card.is-test .card__num{background:#22A06B;}
+.card__title{font-weight:900;font-size:0.98rem;}
+.card__skill{font-size:0.76rem;color:var(--color-primary);font-weight:700;}
+.card dl{margin-top:0.5rem;font-size:0.8rem;}
+.card dt{font-weight:700;color:var(--color-text-sub);margin-top:0.4rem;font-size:0.72rem;letter-spacing:0.05em;}
+.card dd{margin-left:0;}
+
+/* チェックリスト */
+.checklist{list-style:none;margin:var(--space-xs) 0 var(--space-md);}
+.checklist li{display:flex;gap:0.5rem;align-items:flex-start;padding:0.35rem 0;font-size:0.86rem;border-bottom:1px dashed var(--color-border);}
+.checklist li .material-icons{color:#22A06B;font-size:1.1rem;flex-shrink:0;margin-top:0.15rem;}
+.group-label{display:inline-block;background:var(--color-bg-sub);border-left:4px solid var(--color-primary);padding:0.3rem 0.7rem;font-weight:700;font-size:0.85rem;margin:var(--space-sm) 0 var(--space-xs);}
+
+/* 注記 */
+.note{background:#FFF8F4;border-left:4px solid var(--color-accent);padding:var(--space-sm);border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:0.86rem;margin:var(--space-sm) 0;}
+.note b{color:var(--color-accent);}
+
+/* フェードイン */
+.fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.fi.is-visible{opacity:1;transform:translateY(0);}
+
+/* フッター */
+.footer{margin-left:var(--sidebar-w);background:var(--color-text);color:#fff;padding:var(--space-md);font-size:0.85rem;}
+.footer p{color:#E8EAED;margin-bottom:0.4rem;}
+.footer p:last-child{color:#AAB;margin-bottom:0;}
+.footer a{color:#8AB4FF;text-decoration:none;}
+.footer code{background:rgba(255,255,255,0.12);color:#fff;}
+
+/* テーブル内リンク */
+td a{color:var(--color-primary);text-decoration:none;word-break:break-all;}
+td a:hover{text-decoration:underline;}
+
+/* 印刷対応 */
+@media print{
+  .sidebar,.menu-toggle{display:none !important;}
+  .main,.hero,.footer{margin-left:0 !important;}
+  .hero{background:#fff !important;color:#000 !important;}
+  .hero h1,.hero p{color:#000 !important;}
+  .section:nth-child(even){background:#fff !important;}
+  .fi{opacity:1 !important;transform:none !important;}
+  .footer{background:#fff !important;color:#000 !important;border-top:1px solid #ccc;}
+  .footer p,.footer p:last-child{color:#000 !important;}
+  th{background:#eee !important;color:#000 !important;}
+  a{color:#000 !important;}
+  .note,.loopbox{break-inside:avoid;}
+}
+
+/* モバイルトグル */
+.menu-toggle{display:none;position:fixed;top:0.7rem;left:0.7rem;z-index:200;background:var(--color-text);color:#fff;border:none;border-radius:var(--radius-sm);width:44px;height:44px;cursor:pointer;}
+.menu-toggle .material-icons{font-size:1.6rem;}
+
+@media (max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .main,.hero,.footer{margin-left:0;}
+  .menu-toggle{display:flex;align-items:center;justify-content:center;}
+  .hero{padding-top:calc(var(--space-lg) + 30px);}
+}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+  <span class="material-icons">menu</span>
+</button>
+
+<!-- ===== サイドバー ===== -->
+<aside class="sidebar">
+  <div class="sidebar__brand">
+    <span class="material-icons">rocket_launch</span>
+    <b>AI駆動アジャイル開発</b>
+    <span>実践ガイド＆運用マニュアル</span>
+  </div>
+  <ul class="sidebar__menu">
+    <li class="sidebar__group">はじめに</li>
+    <li><a href="#overview" class="active"><span class="material-icons">info</span>概要</a></li>
+    <li><a href="#coach"><span class="material-icons">tour</span>まず使う：進行役 /agile-coach</a></li>
+    <li class="sidebar__group">全体像</li>
+    <li><a href="#flow"><span class="material-icons">account_tree</span>全体像（流れ図）</a></li>
+    <li><a href="#cadence"><span class="material-icons">calendar_today</span>1日・1スプリントの流れ</a></li>
+    <li class="sidebar__group">使い方</li>
+    <li><a href="#process"><span class="material-icons">view_module</span>8工程ガイド</a></li>
+    <li><a href="ai-agile-skills_v1.html"><span class="material-icons">menu_book</span>スキル詳細マニュアル →</a></li>
+    <li><a href="#principles"><span class="material-icons">rule</span>各工程の原則と落とし穴</a></li>
+    <li><a href="#timing"><span class="material-icons">schedule</span>利用タイミング早見表</a></li>
+    <li><a href="#examples"><span class="material-icons">input</span>入力→出力の具体例</a></li>
+    <li><a href="#prepare"><span class="material-icons">inventory</span>会議の持ち物＆引き継ぎ</a></li>
+    <li><a href="#templates"><span class="material-icons">description</span>テンプレート集</a></li>
+    <li><a href="#checklist"><span class="material-icons">checklist</span>導入チェックリスト</a></li>
+    <li class="sidebar__group">運用</li>
+    <li><a href="#ops"><span class="material-icons">settings</span>運用方法</a></li>
+    <li><a href="#reporting"><span class="material-icons">auto_graph</span>自動報告・KPIダッシュボード</a></li>
+    <li><a href="#stack"><span class="material-icons">layers</span>技術スタックの扱い</a></li>
+    <li><a href="#faq"><span class="material-icons">help_outline</span>困ったとき（FAQ）</a></li>
+    <li><a href="#feedback"><span class="material-icons">campaign</span>フィードバック</a></li>
+    <li class="sidebar__group">参考・根拠（あとで読む）</li>
+    <li><a href="#pmbok"><span class="material-icons">foundation</span>PMBOK7原則レイヤー</a></li>
+    <li><a href="#mapping"><span class="material-icons">link</span>IPA×工程マッピング</a></li>
+    <li><a href="#sources"><span class="material-icons">verified</span>出典一覧</a></li>
+  </ul>
+  <div class="sidebar__foot">更新日: 2026-06-15<br>用語は「やさしい和訳（カタカナ）」で統一</div>
+</aside>
+
+<!-- ===== ヒーロー ===== -->
+<header class="hero">
+  <h1>AI駆動アジャイル開発<br>実践ガイド＆運用マニュアル</h1>
+  <p>IPA等の公的提言を土台に、AIと協働する「素早く柔軟な開発（アジャイル）」を8工程に体系化。各工程は Claude Code スキルとして呼び出せます。</p>
+  <p style="margin-top:var(--space-sm);font-size:1.05rem;background:rgba(255,255,255,0.16);display:inline-block;padding:0.6rem 1rem;border-radius:var(--radius-md);">
+    <span class="material-icons" style="vertical-align:middle">tour</span> <b>まずは <code style="background:rgba(255,255,255,0.25);color:#fff">/agile-coach</code> から。</b>迷っても困っても、毎日の運営も、これ1つでOK → <a href="#coach" style="color:#fff;text-decoration:underline">くわしく</a>
+  </p>
+  <div class="hero__tags">
+    <span>まず /agile-coach（進行役）</span>
+    <span>社内開発チーム向け</span>
+    <span>8工程スキル</span>
+    <span>新規/既存どちらも</span>
+    <span>GitHub重複防止</span>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ===== 概要 ===== -->
+<section class="section" id="overview">
+  <div class="section__inner fi">
+    <span class="eyebrow">Overview</span>
+    <h2>これは何か</h2>
+    <p class="lead">AIと協働するアジャイル開発の「進め方の地図」と「各工程を実行するスキル」をまとめたものです。文章より、表と図で素早く掴めるよう構成しています。</p>
+    <div class="note"><span class="material-icons" style="vertical-align:middle;color:var(--color-accent)">tour</span> <b>迷ったら進行役 <code>/agile-coach</code> から。</b>最初にヒアリングして現在地を見極め、8工程スキルへ順に案内します（オーケストレーター）。<br><b>新規（ゼロから）</b>は①から、<b>既存（もう動いている）</b>は現状を把握してから足りない所を補ってレールに乗せます。最初に<b>使うプロジェクト管理／バージョン管理ツール（Jira/Backlog/GitHub等）を確認</b>し、連携できれば自動登録・担当把握・重複防止・ふりかえり自動化に活かします。<b>無い役割は「用意しますか？」と確認のうえ新規セットアップ</b>を案内します（人＝アカウント/トークン、AI＝git初期化・CODEOWNERS/CI・接続後の登録。最小限から）。自分で工程を選ぶなら下の「利用タイミング早見表」を参照。</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>項目</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>目的</td><td>AI駆動 × アジャイル開発を、チーム共通言語として標準化・オンボーディングできる形にする</td></tr>
+          <tr><td>体系</td><td>ハイブリッド方式：外枠＝プロジェクト全体の流れ（IPAモデル契約準拠）／反復内＝短期開発サイクル（スクラム）</td></tr>
+          <tr><td>使い手</td><td>社内の開発チーム（メンバー・リード・製品責任者候補・新規参画者）</td></tr>
+          <tr><td>成果物</td><td>① 実践ガイド（本書）＋ ② 8工程の Claude Code スキル群</td></tr>
+          <tr><td>用語方針</td><td>アジャイル用語は「やさしい和訳（カタカナ用語）」で統一（例：ふりかえり（レトロスペクティブ））</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="border-left-color:#0E9F9F"><b>考え方（トヨタ生産方式／リーンの背骨・6原則）：</b>本体系の各工程は突き詰めるとこの6つの実践です（アジャイル/リーンの源流はTPS）。①<b>ムダを出さない</b>（作りすぎ・大きな仕掛かり・待ち・手戻り）②<b>品質を工程で作り込む（自働化）</b>（テスト/レビュー/DoDで止める）③<b>見える化して即止める（アンドン）</b>（Draft PR・デイリー・CI赤）④<b>小さく改善し続ける（カイゼン）</b>（ふりかえり）⑤<b>モノと情報の流れを見て一致させる（VSM）</b>（滞留＝最大のムダを潰す／情報を実態と一致）⑥<b>人間性尊重</b>（無理をさせない・心理的安全・育成・属人化防止）。迷ったらここへ立ち返る。詳細は正本 <code>docs/ai-agile-playbook.md</code> の「0. 考え方」。<br>※AIは進め方を<b>増幅</b>する＝弱い流れのままAIを増やすとムダ・不良も増幅（DORA 2025）。「AIを足す前に流れとムダを直す」。</div>
+    <div class="note"><b>正本（SSOT）は <code>docs/ai-agile-playbook.md</code>。</b>このHTMLは閲覧用の派生物です。内容を変えるときは<b>先にmd を更新</b>し、HTMLを追従させてください（二重管理による食い違い防止）。オンライン環境での閲覧を前提にしています（アイコン・フォントは外部読込）。</div>
+  </div>
+</section>
+
+<!-- ===== まず使う：進行役 ===== -->
+<section class="section" id="coach" style="background:#F0FBFA;border-top:3px solid #0E9F9F;">
+  <div class="section__inner fi">
+    <span class="eyebrow" style="color:#0B7A77">Start Here</span>
+    <h2><span class="material-icons" style="vertical-align:middle;color:#0E9F9F;font-size:1.6rem">tour</span> まずはここから：進行役 <code>/agile-coach</code></h2>
+    <p class="lead"><b>工程を覚えなくてOK。迷ったら・困ったら・毎日の運営も、まず <code>/agile-coach</code> に話しかけるだけ。</b>状況を聞いて、適切な工程スキルへ案内してくれる「進行役（オーケストレーター）」です。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>こんなとき</th><th>/agile-coach がすること</th></tr></thead>
+        <tbody>
+          <tr><td><b>始めるとき</b>（新規/既存）</td><td>ヒアリング→<b>新規/既存を判定</b>→入口の工程を決めて案内。既存は<b>現状を把握してレールに乗せる</b></td></tr>
+          <tr><td><b>毎日</b>（運営）</td><td>「デイリー」で <b>今日のタスク・触る所・openブランチ</b>を確認 →<b>重複・衝突を検知</b>、WIPを抑制</td></tr>
+          <tr><td><b>困ったとき</b></td><td>どの工程か分からない／詰まった → 状況を話せば次の一手とFAQを案内</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="background:#fff;border-left-color:#0E9F9F"><b>呼び出し方：</b><code>/agile-coach</code>／「アジャイルで進めたい」「何から始めれば？」「デイリー」「今日の進捗共有」「困った」。<br><b>最初に使うツールを確認</b>し、連携できれば自動登録・担当把握・重複防止・ふりかえり自動化に活かします。<b>無い役割は「用意しますか？」と確認して新規セットアップ</b>を案内します（人＝アカウント/トークン、AI＝git初期化・CODEOWNERS/CI・接続後の登録。最小限から）。<b>各工程のドキュメント方針（形式・保存先・粒度）も最初に確認</b>し、全工程で踏襲します（既定：md中心・<code>docs/</code>・必要最小限）。<b>自動報告（日次・週次・月次）の要否も最初に確認</b>し、必要なら タイミング→報告先（Teams/Slack/メール/PMツール）を聞いて、送信アダプタ×スケジューラで自動送信します（初回はドライランで人が確認。設定＝<code>templates/自動報告設定.md</code>）。<br>進め方の状態は <code>docs/agile-state.md</code> に記録され、日をまたいでも続きから進めます。詳しくは <a href="ai-agile-skills_v1.html#agile-coach">スキル詳細マニュアル（進行役）</a>。</div>
+
+    <h3><span class="material-icons">badge</span>役割ごとの主な使用スキル</h3>
+    <p>「どの役割が、どのスキルを主に使うか」の案内です。進行支援役（SM）は<b>全工程を伴走するオーケストレーター</b>なので全スキルを使います。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>役割</th><th>主に使うスキル（工程）</th></tr></thead>
+        <tbody>
+          <tr><td><b>進行支援役（SM）</b></td><td><b>全スキル</b>（オーケストレーターとして全工程を伴走）</td></tr>
+          <tr><td>製品責任者（PO）</td><td>①構想（<code>/agile-inception</code>）・②優先順位（<code>/agile-backlog-setup</code>）・⑥成果デモで価値確認（<code>/agile-review-security</code>）・⑧価値測定（<code>/agile-retrospective</code>）</td></tr>
+          <tr><td>SE（開発者）</td><td>③仕様（<code>/agile-sprint-planning</code>）・④実装（<code>/agile-ai-implementation</code>）・⑤テスト（<code>/tdd-ai</code>）・⑥レビュー（<code>/agile-review-security</code>）</td></tr>
+          <tr><td>インフラ</td><td>④の環境部分（<code>/agile-ai-implementation</code>）・⑦リリース運用（<code>/agile-release-ops</code>）・⑥セキュリティ点検（<code>/agile-review-security</code>）</td></tr>
+          <tr><td>関係者（ステークホルダー）</td><td>成果デモ（⑥）に参加（閲覧中心）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="background:#fff;border-left-color:#0E9F9F"><b>これは「主担当スキルの案内」です。</b>スキルは技術的にアクセス制限できません（誰でも呼べます）。「他人の仕事を勝手にやらない」歯止めは、<b>着手前の担当（Assignee）確認ゲート</b>が担います（工程④の「着手前確認」を参照）。</div>
+
+    <h3><span class="material-icons">person_pin</span>この開発者の登録（名前＋役割）</h3>
+    <p>AIは「今のセッションが誰の手元か」を判別できません。他人の担当を勝手に進めないため、<b><code>CLAUDE.md</code> の「## この開発者」に自分の名前と役割を登録</b>します。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>状況</th><th>登録のしかた</th></tr></thead>
+        <tbody>
+          <tr><td>PMツール連携あり</td><td>体制をツールに事前登録 → メンバー一覧から選択</td></tr>
+          <tr><td>連携なし</td><td>名前・役割を手入力で <code>CLAUDE.md</code> に記載</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">tune</span>ドキュメントの粒度（3段階・既定＝標準）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>粒度</th><th>残すもの</th></tr></thead>
+        <tbody>
+          <tr><td>最小</td><td>決定だけ（状態＋チケット中心）</td></tr>
+          <tr><td><b>標準（既定）</b></td><td>主要成果物の md のみ</td></tr>
+          <tr><td>詳細</td><td>全工程＋設計判断ログ・メトリクス・ナレッジ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">description</span>形式（md 既定。顧客指定があれば Excel/Word/PDF）</h3>
+    <p>形式は <b>md が既定</b>ですが、顧客の指定があれば対応する生成スキルで作ります。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>形式</th><th>使うスキル</th></tr></thead>
+        <tbody>
+          <tr><td>Markdown（既定）</td><td>そのまま <code>docs/</code> に保存</td></tr>
+          <tr><td>Excel（顧客指定）</td><td><code>xlsx</code> スキル</td></tr>
+          <tr><td>Word（顧客指定）</td><td><code>docx</code> スキル</td></tr>
+          <tr><td>PDF（顧客指定）</td><td><code>pdf</code> スキル</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="background:#fff;border-left-color:#0E9F9F"><b>既存ドキュメントの踏襲（顧客の様式が最優先）：</b>顧客や既存プロジェクトに様式があれば、独自テンプレを押し付けません。<b>代表サンプルを読み込んで、章立て・項目・粒度・形式を抽出</b>し、それに合わせて作ります。</div>
+
+    <h3><span class="material-icons">folder</span>命名規約（工程別の日本語フォルダ＋日本語ファイル名）</h3>
+    <p>成果物は<b>工程別の日本語フォルダ＋日本語ファイル名</b>で保存します（次工程のスキルが読み込みやすく、人にも分かりやすい）。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>フォルダ</th><th>入れるもの</th></tr></thead>
+        <tbody>
+          <tr><td><code>docs/01_構想</code> … <code>docs/08_ふりかえり</code></td><td>各工程の成果物（①〜⑧）</td></tr>
+          <tr><td><code>docs/ナレッジ</code>／<code>docs/メトリクス</code></td><td>知見・計測（詳細粒度のとき）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="background:#fff;border-left-color:#0E9F9F"><b>例外（英語のまま）：</b><code>CLAUDE.md</code>・<code>CODEOWNERS</code>・<code>.github/workflows</code>・ソースコードは英語名のままにします（ツール側の規約があるため）。</div>
+    <div class="note"><b>知見をためる系は「種別＋識別子」でユニーク命名し、ためるだけでなく"活かす"。</b>ふりかえり・引き継ぎ・設計判断・ナレッジは同名で衝突しないよう <b>日付／担当／テーマ</b> を付けます（例：<code>ふりかえり_2026-07-10.md</code>／<code>引き継ぎ_氏名_20260710.md</code>／<code>設計判断_認証_20260710.md</code>）。蓄積した知見は ③計画・④実装・⑥レビュー・⑧ふりかえり の<b>着手前に参照して再利用・同じ失敗の回避</b>に使います。</div>
+  </div>
+</section>
+
+<!-- ===== 全体像 ===== -->
+<section class="section" id="flow">
+  <div class="section__inner fi">
+    <span class="eyebrow">Flow</span>
+    <h2>全体像（流れ図）</h2>
+    <p>外枠の流れ（①②⑦）の中で、③〜⑥⑧の短期開発サイクルをくり返します。テスト工程⑤は既存スキル <code>/tdd-ai</code> に接続します。</p>
+    <div class="flow">
+      <div class="flow__phase">外枠：プロジェクト全体の流れ</div>
+      <div class="flow__row">
+        <div class="node node--outer"><b>① 構想・適合性</b><small>向き不向きを見極める</small></div>
+        <div class="node node--outer"><b>② 立上げ・やることリスト</b><small>体制・製品の目標・CLAUDE.md</small></div>
+      </div>
+      <div class="arrow-down"><span class="material-icons">south</span></div>
+      <div class="loopbox">
+        <div class="loopbox__label"><span class="material-icons">loop</span>くり返し：短期開発サイクル（スプリント）</div>
+        <div class="flow__row">
+          <div class="node node--loop"><b>③ 計画づくり</b><small>仕様を先に固める</small></div>
+          <div class="node node--loop"><b>④ AI駆動実装</b><small>小さく作る・安全に</small></div>
+          <div class="node node--loop"><b>⑤ テスト・品質保証</b><small>▶ /tdd-ai 接続</small></div>
+          <div class="node node--loop"><b>⑥ レビュー・セキュリティ</b><small>第三者視点・検証ゲート</small></div>
+        </div>
+        <div class="arrow-down"><span class="material-icons">south</span></div>
+        <div class="flow__row">
+          <div class="node node--loop" style="max-width:340px"><b>⑧ ふりかえり</b><small>改善を決めて ③ へ戻る（循環）</small></div>
+        </div>
+      </div>
+      <div class="arrow-down"><span class="material-icons">south</span> <small>⑥のあと</small></div>
+      <div class="flow__row">
+        <div class="node node--outer" style="max-width:340px"><b>⑦ リリース・運用</b><small>脆弱性対応・継続的リリース → 次サイクルへ</small></div>
+      </div>
+    </div>
+    <div class="note"><b>設計思想：</b>スクラムは本来「工程を時間順に固定しない」ため、反復の中身をサイクルの活動、外枠を全体の流れとして二層で表現し、各工程にIPAの品質・セキュリティ・AI提言を内蔵しています。</div>
+  </div>
+</section>
+
+<!-- ===== 1日・1スプリントの流れ ===== -->
+<section class="section" id="cadence">
+  <div class="section__inner fi">
+    <span class="eyebrow">Cadence</span>
+    <h2>1日・1スプリントの流れ</h2>
+    <p>「2週間（営業日10日）の短期開発サイクル（スプリント）」を例にした流れです。日数はチームに合わせて調整してください。</p>
+
+    <h3><span class="material-icons">date_range</span>1スプリント（2週間）の流れ</h3>
+    <div class="timeline">
+      <div class="tl-day tl-day--plan">
+        <div class="tl-day__head">Day 1</div>
+        <div class="tl-day__body"><span class="pill">③計画づくり</span>今回の目標と仕様を固める</div>
+      </div>
+      <div class="tl-day">
+        <div class="tl-day__head">Day 2-4</div>
+        <div class="tl-day__body"><span class="pill">④実装</span><span class="pill">⑤テスト</span><span class="pill">⑥レビュー</span>日次で小さく回す</div>
+      </div>
+      <div class="tl-day">
+        <div class="tl-day__head">Day 5-6</div>
+        <div class="tl-day__body"><span class="pill">④⑤⑥</span>同上。中間で進捗確認</div>
+      </div>
+      <div class="tl-day">
+        <div class="tl-day__head">Day 7-9</div>
+        <div class="tl-day__body"><span class="pill">④⑤⑥</span>仕上げ・品質ゲート通過</div>
+      </div>
+      <div class="tl-day tl-day--review">
+        <div class="tl-day__head">Day 10</div>
+        <div class="tl-day__body"><span class="pill">⑥成果デモ会</span><span class="pill">⑧ふりかえり</span>次サイクルの改善決定</div>
+      </div>
+    </div>
+    <div class="note"><b>ポイント：</b>計画（Day1）と 成果デモ会＋ふりかえり（Day10）で挟み、間は日次サイクルをくり返す。⑧で決めた改善は次スプリントの③に反映（循環）。リリース（⑦）は準備が整い次第いつでも。</div>
+
+    <h3><span class="material-icons">today</span>1日の流れ（デイリー）</h3>
+    <div class="daystrip">
+      <div class="slot">
+        <b><span class="material-icons">wb_sunny</span>朝（15分）</b>
+        <small>朝会（デイリースクラム）— <code>/agile-coach</code>「デイリー進行」</small>
+        <ul>
+          <li>今日のタスク（Issue番号）・今日触る所・openブランチを宣言</li>
+          <li>同じ場所を複数人が触らないか確認（被ったらペア／順序）＝重複防止</li>
+          <li>WIP（同時着手）が増えすぎなら、新規より完了を優先</li>
+        </ul>
+      </div>
+      <div class="slot">
+        <b><span class="material-icons">code</span>日中（開発サイクル）</b>
+        <small>小さく回す ④→⑤→⑥</small>
+        <ul>
+          <li>③の仕様を確認 → ④AIで小さく実装</li>
+          <li>⑤テスト先行（/tdd-ai）で検証</li>
+          <li>⑥セルフ／第三者視点レビュー</li>
+        </ul>
+      </div>
+      <div class="slot">
+        <b><span class="material-icons">nights_stay</span>夕方（締め）</b>
+        <small>検証ゲートと記録</small>
+        <ul>
+          <li>検証ゲート（文法/型/テスト）を通す</li>
+          <li>差分レビュー依頼・進捗を更新</li>
+          <li>気づき（AIが効いた/事故った）をメモ → ⑧用</li>
+        </ul>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>タイミング</th><th>やること</th><th>使うスキル</th></tr></thead>
+        <tbody>
+          <tr><td>朝</td><td>進捗共有・今日のゴール決め</td><td>（会議。スキル不要）</td></tr>
+          <tr><td>日中</td><td>仕様確認→実装→テスト→レビューを小さく反復</td><td><code>/agile-ai-implementation</code> → <code>/tdd-ai</code> → <code>/agile-review-security</code></td></tr>
+          <tr><td>夕方</td><td>検証ゲート通過・差分レビュー・気づき記録</td><td><code>/agile-review-security</code></td></tr>
+          <tr><td>スプリント末</td><td>成果デモ会・ふりかえり・改善決定</td><td><code>/agile-retrospective</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 8工程ガイド ===== -->
+<section class="section" id="process">
+  <div class="section__inner fi">
+    <span class="eyebrow">Process</span>
+    <h2>8工程ガイド</h2>
+    <p>各工程の「動き・目的・ペルソナ・いつ使うか」。<span class="badge">青</span>＝判断系（強ペルソナ）／<span class="badge--accent badge">橙</span>＝実装（適応型）／<span class="badge" style="background:#22A06B">緑</span>＝テスト。</p>
+    <div class="note"><span class="material-icons" style="vertical-align:middle;color:var(--color-primary);font-size:1.1rem">touch_app</span> 文中の<b>スキル名（<code>/agile-…</code>）をクリック</b>すると、<a href="ai-agile-skills_v1.html">スキル詳細マニュアル</a>の該当スキルへ飛べます。</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">1</span><div><div class="card__title">構想・適合性の見極め</div><div class="card__skill">/agile-inception</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>数問ヒアリングし向き不向きを判定。向かなければ別の進め方を提案</dd>
+          <dt>目的</dt><dd>アジャイル／AI駆動が向くかを着手前に見極める</dd>
+          <dt>ペルソナ</dt><dd>適合性の門番（懐疑的アドバイザー）</dd>
+          <dt>裏取り</dt><dd>価値・市場は<b>事実と推測を分け、事実は出典必須</b>。価値仮説は「誰の課題／代替手段／なぜ良いか」で確認</dd>
+          <dt>横断テク</dt><dd>価値仮説・適合性を<b>独立検証（デビルズアドボケイト）</b>で反証＝<code>独立検証_デビルズアドボケイト.md</code></dd>
+          <dt>いつ使う</dt><dd>新案件の相談・契約/見積り前・進め方に迷ったとき</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">2</span><div><div class="card__title">立上げ・やることリスト準備</div><div class="card__skill">/agile-backlog-setup</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>役割・製品の目標・やることリストを整理し、CLAUDE.mdを用意</dd>
+          <dt>目的</dt><dd>体制・製品の目標・最初の機能要望リストを用意</dd>
+          <dt>ペルソナ</dt><dd>立上げファシリテーター（役割の曖昧さを許さない）</dd>
+          <dt>いつ使う</dt><dd>プロジェクト立上げ・体制づくり・CLAUDE.md整備</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">3</span><div><div class="card__title">反復の計画づくり</div><div class="card__skill">/agile-sprint-planning</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>今回の目標を決め、AIが迷わない仕様（対象/対象外/確認手順）を書き出す</dd>
+          <dt>目的</dt><dd>今回の目標と「何を・どうやるか」を決める</dd>
+          <dt>ペルソナ</dt><dd>仕様の番人（曖昧さハンター）</dd>
+          <dt>いつ使う</dt><dd>サイクル開始時・実装前に仕様を固めたいとき</dd>
+        </dl>
+      </div>
+
+      <div class="card is-impl">
+        <div class="card__head"><span class="card__num">4</span><div><div class="card__title">AI駆動での実装</div><div class="card__skill">/agile-ai-implementation</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>技術スタックを確認し、小さく安全に実装。脆弱性も自己チェック</dd>
+          <dt>目的</dt><dd>やることリストを「動く成果物」にする</dd>
+          <dt>ペルソナ</dt><dd>適応型実装者（技術スタックで人格切替）</dd>
+          <dt>いつ使う</dt><dd>実装フェーズ。着手時にスタックを確定し記録</dd>
+          <dt>着手前確認</dt><dd>AIは今のセッションが誰の手元か分からないため、<b>着手前に「この開発者は誰か（CLAUDE.mdの <code>## この開発者</code>）」と「その項目の担当（Assignee）」を確認</b>。自分以外／未割当なら止めて確認する（他人の担当を勝手に進めない）</dd>
+          <dt>知見活用</dt><dd>実装前に <code>docs/ナレッジ/</code> の過去の設計判断・つまずき・効いたプロンプトを<b>参照して再利用・同じ失敗を回避</b>。作業後は新たな知見を追記（ためる→活かすの循環。ナレッジ蓄積系スキルがあれば「活用モード」で引き出す）</dd>
+        </dl>
+      </div>
+
+      <div class="card is-test">
+        <div class="card__head"><span class="card__num">5</span><div><div class="card__title">テスト・品質保証</div><div class="card__skill">/tdd-ai（既存・接続）</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>先にテストを書かせ「失敗→実装で成功」の順で品質を担保</dd>
+          <dt>目的</dt><dd>完成の条件を満たすかをテストで保証</dd>
+          <dt>ペルソナ</dt><dd>TDD番人（core/frontend/backend/ai-guard）</dd>
+          <dt>いつ使う</dt><dd>実装と並走。先にテストを書く（失敗→成功）</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">6</span><div><div class="card__title">レビュー・セキュリティ</div><div class="card__skill">/agile-review-security</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>別視点のサブエージェントで差分をレビューし、脆弱性・要件ズレを指摘（重要度タグ🔴🟡🟢で仕分け）</dd>
+          <dt>目的</dt><dd>正確性・安全・要件適合を人間の責任で確認</dd>
+          <dt>横断テク</dt><dd>役割を「反証」に固定する<b>独立検証（デビルズアドボケイト）</b>は①③⑧でも使える＝<code>独立検証_デビルズアドボケイト.md</code></dd>
+          <dt>ペルソナ</dt><dd>出荷判断の門番（敵対的レビュアー）</dd>
+          <dt>いつ使う</dt><dd>マージ前・成果デモ会前・脆弱性確認</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">7</span><div><div class="card__title">リリース・運用</div><div class="card__skill">/agile-release-ops</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>切り戻し手段と脆弱性対応を確認し、安全にリリース・運用へ載せる</dd>
+          <dt>目的</dt><dd>継続的リリースと運用中のリスク対応</dd>
+          <dt>ペルソナ</dt><dd>リリースゲートキーパー（可逆性・脆弱性対応に厳しい）</dd>
+          <dt>いつ使う</dt><dd>リリース時・脆弱性対応・運用フェーズ</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><span class="card__num">8</span><div><div class="card__title">ふりかえり</div><div class="card__skill">/agile-retrospective</div></div></div>
+        <dl>
+          <dt>動き</dt><dd>事実とAI活用を振り返り、価値KPIを測って次の改善を1〜3個決める</dd>
+          <dt>目的</dt><dd>進め方の改善をサイクルごとに計画</dd>
+          <dt>ペルソナ</dt><dd>忖度しないコーチ</dd>
+          <dt>いつ使う</dt><dd>サイクル末・改善を決めて次の計画へ</dd>
+          <dt>ヒアリング</dt><dd>各メンバーにAIがヒアリングして下書き（実績把握→本人向け質問→要約。体験・判断は本人に確認し、個人評価には使わない）。保存の正本は<b>リポジトリのmd（<code>docs/08_ふりかえり/</code>）</b>、要約を<b>ツール（Wiki等）に公開</b>（書き込みは事前確認）</dd>
+        </dl>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== 各工程の原則と落とし穴 ===== -->
+<section class="section" id="principles">
+  <div class="section__inner fi">
+    <span class="eyebrow">Playbook</span>
+    <h2>各工程の原則と落とし穴</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程</th><th>原則（やるべきこと）</th><th>落とし穴（避けること）</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">①</span> 構想・適合性</td><td>やる前に向き不向きを判断（IPA契約前チェック4点）</td><td>向かない案件に無理にアジャイルを当てる</td></tr>
+          <tr><td><span class="badge">②</span> 立上げ</td><td>役割を明確化（製品責任者=ユーザ／進行支援役=ベンダ）<br><small>※内製なら「ユーザ＝社内事業部門／ベンダ＝社内開発チーム」と読み替え。準委任契約は社外委託時のみ</small></td><td>CLAUDE.mdを盛り込みすぎて指示が無視される</td></tr>
+          <tr><td><span class="badge">③</span> 計画づくり</td><td>実装前に仕様（ファイル・関数・対象外・確認手順）を書く</td><td>曖昧な仕様のままAIが「間違った問題」を高速に解く</td></tr>
+          <tr><td><span class="badge--accent badge">④</span> 実装</td><td>小さく作る・具体的指示・安全に作り込む</td><td>AI生成コードの45%が脆弱／約20%が実在しない部品を参照</td></tr>
+          <tr><td><span class="badge" style="background:#22A06B">⑤</span> テスト</td><td>先にテストを書く（失敗→成功）＝TDD</td><td>AIが失敗テストを飛ばし「現状追認テスト」を作る</td></tr>
+          <tr><td><span class="badge">⑥</span> レビュー</td><td>第三者視点・検証ゲート・「検証できないものは出荷しない」</td><td>「AIだから安全」を信じる／過剰設計の指摘を採用</td></tr>
+          <tr><td><span class="badge">⑦</span> リリース</td><td>脆弱性対応プロセス・AIライフサイクルのリスク管理</td><td>速度向上の裏で不安定さが増す</td></tr>
+          <tr><td><span class="badge">⑧</span> ふりかえり</td><td>DORA7能力で点検・改善を1〜3個に絞る</td><td>弱い進め方のままAIを増やし問題を増幅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 利用タイミング早見表 ===== -->
+<section class="section" id="timing">
+  <div class="section__inner fi">
+    <span class="eyebrow">When to use</span>
+    <h2>利用タイミング早見表</h2>
+    <p>「こう言いたい／こういう状況」になったら、対応するスキルを呼び出します。<b>呼ぶと何をするか</b>も並べたので、イメージしてから使えます。</p>
+    <div class="note" style="font-size:0.82rem"><b>似た表の使い分け：</b><b>いつ呼ぶか</b>＝この早見表／<b>何を作るか</b>＝「入力→出力の具体例」／<b>会議に何を持参するか</b>＝「会議の持ち物＆引き継ぎ」。</div>
+    <div class="note" style="font-size:0.82rem"><span class="material-icons" style="vertical-align:middle;color:var(--color-accent);font-size:1.1rem">priority_high</span> <b>スキル名で明示起動を推奨：</b>「レビューして」「実装して」「テストして」等の言葉は、環境にある他のスキル（<code>code-review</code>・<code>tdd</code> 等）とも重なります。確実に呼ぶには <b><code>/agile-review-security</code> のようにスラッシュ＋スキル名</b>で起動してください。</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>こんなとき・こう言いたい</th><th>呼び出すスキル</th><th>呼ぶと何をする？（ざっくりの動き）</th><th>工程</th></tr></thead>
+        <tbody>
+          <tr><td><b>「アジャイルで開発を進めたい」「何から始めれば？」「進め方を案内して」</b></td><td><code>/agile-coach</code></td><td><b>最初にヒアリングし、現在地を見極めて各工程スキルへ案内する進行役（迷ったらまずこれ）</b></td><td><span class="badge--accent badge">入口</span></td></tr>
+          <tr><td>「この案件アジャイルで行ける？」「やる前に見極めたい」</td><td><code>/agile-inception</code></td><td>数問ヒアリングし、アジャイル/AI活用が向くか判定。向かなければ別の進め方を提案する</td><td><span class="badge">①</span></td></tr>
+          <tr><td>「体制を組みたい」「やることリストを作りたい」「CLAUDE.md整備」</td><td><code>/agile-backlog-setup</code></td><td>役割・製品の目標・やることリストを一緒に整理し、CLAUDE.md（前提メモ）を用意する</td><td><span class="badge">②</span></td></tr>
+          <tr><td>「今回の目標を決めたい」「実装前に仕様を固めたい」</td><td><code>/agile-sprint-planning</code></td><td>今回の目標を決め、AIが迷わない仕様（対象ファイル・対象外・確認手順）を書き出す</td><td><span class="badge">③</span></td></tr>
+          <tr><td>「実装して」「コードを書いて」「安全に作って」</td><td><code>/agile-ai-implementation</code></td><td>技術スタックを確認し、小さく安全に実装。AI生成コードの脆弱性も自己チェックする</td><td><span class="badge--accent badge">④</span></td></tr>
+          <tr><td>「テストを書いて」「TDDで」「品質を担保したい」</td><td><code>/tdd-ai</code></td><td>先にテストを書かせ「失敗→実装で成功」の順で品質を担保する（テスト番人）</td><td><span class="badge" style="background:#22A06B">⑤</span></td></tr>
+          <tr><td>「レビューして」「第三者視点で」「脆弱性チェック」</td><td><code>/agile-review-security</code></td><td>別視点のサブエージェントに差分を見せてレビューし、脆弱性・要件ズレを指摘する</td><td><span class="badge">⑥</span></td></tr>
+          <tr><td>「リリースしたい」「運用」「脆弱性対応」</td><td><code>/agile-release-ops</code></td><td>切り戻し手段と脆弱性対応プロセスを確認し、安全にリリース・運用へ載せる</td><td><span class="badge">⑦</span></td></tr>
+          <tr><td>「ふりかえりたい」「改善を決めたい」「DORAで点検」</td><td><code>/agile-retrospective</code></td><td>事実とAI活用を振り返り、価値KPIを測って、次の改善を1〜3個に絞って決める</td><td><span class="badge">⑧</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 入力→出力の具体例 ===== -->
+<section class="section" id="examples">
+  <div class="section__inner fi">
+    <span class="eyebrow">Input / Output</span>
+    <h2>入力→出力の具体例</h2>
+    <p>各スキルが「<b>何を材料に（入力）</b>、<b>何を作るか（出力）</b>」。前の工程の出力が、次の工程の入力になります。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程</th><th>主な入力（材料）</th><th>主な出力（成果物）</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">①</span> 構想・適合性</td><td>案件の概要・目的・関係者</td><td>適合性の判定／進む・止まる・変えるの判断／価値KPIの素案</td></tr>
+          <tr><td><span class="badge">②</span> 立上げ</td><td>製品の狙い・関係者・体制候補</td><td>体制（役割）／製品の目標／優先度付きやることリスト／CLAUDE.md雛形</td></tr>
+          <tr><td><span class="badge">③</span> 計画づくり</td><td>やることリスト＋今回の狙い＋メンバー一覧</td><td>今回の目標／<b>仕様メモ（対象ファイル・関数・対象外・動作確認手順）</b>／<b>スプリントボード（タスク・担当人/AI・見積り）</b></td></tr>
+          <tr><td><span class="badge--accent badge">④</span> 製造（実装）</td><td><b>③の仕様メモ＋技術スタック＋既存コード</b></td><td><b>動くコード（差分/PR）</b>＋安全チェック結果＋実在しない部品の排除</td></tr>
+          <tr><td><span class="badge" style="background:#22A06B">⑤</span> テスト</td><td><b>③の仕様（＋④のコード）</b></td><td><b>テストコード＋テスト結果（緑）</b>＋完成の条件（DoD）充足の確認</td></tr>
+          <tr><td><span class="badge">⑥</span> レビュー</td><td>④の差分＋仕様＋DoD</td><td>指摘リスト（脆弱性・要件ズレ）＋是正済みコード／お披露目の合否</td></tr>
+          <tr><td><span class="badge">⑦</span> リリース</td><td>⑥通過の成果物＋リリース方針</td><td>リリース手順＋切り戻し手段＋脆弱性対応プロセス</td></tr>
+          <tr><td><span class="badge">⑧</span> ふりかえり</td><td>サイクルの事実＋KPI実績＋AI活用ログ</td><td>DORA点検結果＋価値測定＋次サイクルの改善1〜3個</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">play_circle</span>通し具体例：「ログイン機能」を1サイクル流す</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程</th><th>入力（こう言う／こう渡す）</th><th>出力（こう返ってくる）</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">③</span> 計画</td><td>「ログイン機能を追加したい」</td><td>目標「メール＋パスワードでログインできる」／仕様「対象=<code>auth/login.ts</code> の <code>login()</code>、対象外=パスワード再設定、確認=正しい資格情報で200・誤りで401」</td></tr>
+          <tr><td><span class="badge--accent badge">④</span> 製造</td><td>③の仕様メモ＋スタック（React/TS＋Node）＋既存コード</td><td><code>login.ts</code> の実装差分。入力検証・SQLインジェクション対策・パスワードのハッシュ化を自己チェック済み</td></tr>
+          <tr><td><span class="badge" style="background:#22A06B">⑤</span> テスト</td><td>③の仕様（成功/失敗のケース）</td><td><code>login.test.ts</code>（正資格→200、誤り→401、空入力→400）＋全テスト緑</td></tr>
+          <tr><td><span class="badge">⑥</span> レビュー</td><td>④の差分</td><td>指摘「パスワードを平文でログ出力している（要修正）」「エラーメッセージが具体的すぎて攻撃者にヒント（軽微）」→ 修正して合格</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>ポイント：</b>③の「仕様メモ」が製造（④）とテスト（⑤）の<b>共通の材料</b>になります。だから③で仕様を具体的に書くほど、④⑤の出力がブレません。</div>
+  </div>
+</section>
+
+<!-- ===== 会議の持ち物＆引き継ぎ ===== -->
+<section class="section" id="prepare">
+  <div class="section__inner fi">
+    <span class="eyebrow">Prepare &amp; Handoff</span>
+    <h2>会議の持ち物＆引き継ぎ</h2>
+    <p>各工程（会議）に<b>何を用意して持ち込み</b>、そこで<b>何を作り</b>、それを<b>次の工程がどう読み込んで使うか</b>。前の成果物が次の持ち物になります。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程（会議）</th><th>事前に用意する持ち物（インプット）</th><th>この会で作る成果物</th><th>次の工程での使われ方</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">①</span> 構想（キックオフ）</td><td>案件の概要・目的・関係者リスト・（あれば）予算/期日</td><td>適合性の判定／価値KPIの素案／進む・止まるの判断</td><td>②の体制づくりの前提になる</td></tr>
+          <tr><td><span class="badge">②</span> 立上げ</td><td>①の判断結果・関係者・既存資産（コード/資料）の情報</td><td>体制表／製品の目標／やることリスト／CLAUDE.md</td><td>③の計画の材料に。④以降は CLAUDE.md を読み込む</td></tr>
+          <tr><td><span class="badge">③</span> 計画づくり</td><td>やることリスト・今回の狙い・対象コードの場所・メンバー一覧</td><td>今回の目標／<b>仕様メモ</b>／不確実性リスト／<b>スプリントボード（担当割り当て）</b></td><td><b>④実装と⑤テストが仕様メモを読み込む</b>／AI担当タスクは④で並列実行</td></tr>
+          <tr><td><span class="badge--accent badge">④</span> 製造（実装）</td><td>③の仕様メモ・技術スタック・既存コード</td><td>動くコード（差分/PR）／安全チェック結果</td><td>⑤⑥が差分を読み込んで検証・レビュー</td></tr>
+          <tr><td><span class="badge" style="background:#22A06B">⑤</span> テスト</td><td>③の仕様・④のコード</td><td>テストコード／テスト結果（緑）</td><td>⑥が結果と差分を合わせて確認</td></tr>
+          <tr><td><span class="badge">⑥</span> レビュー（成果デモ会）</td><td>④の差分・仕様・DoD・<b>動くデモ</b>・関係者</td><td>指摘リスト／是正済みコード／合否</td><td>⑦のリリース判断／⑧の振り返り材料</td></tr>
+          <tr><td><span class="badge">⑦</span> リリース</td><td>⑥通過の成果物・リリース方針・切り戻し手段</td><td>リリース手順／脆弱性対応プロセス</td><td>次サイクルの運用前提になる</td></tr>
+          <tr><td><span class="badge">⑧</span> ふりかえり</td><td>サイクルの事実・KPI実績・AI活用ログ</td><td>DORA点検／価値測定／改善1〜3個</td><td><b>③次サイクルの計画に反映</b>（循環）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>運用のコツ（「読み込んで次工程で使う」を成立させる）：</b>各工程の成果物は<b>ファイルに残す</b>と、次のスキルが読み込めます。<br>例：③の仕様メモを <code>docs/03_計画・設計/ログイン機能.md</code> に保存 → ④で「<code>docs/03_計画・設計/ログイン機能.md</code> を読み込んで実装して」と渡す → ⑤でも同じ仕様を読んでテストする。<br>こうすると「持ち物＝前工程が残したファイル」になり、口頭での伝え漏れが減ります。<br>持ち物は<a href="#templates">テンプレート集</a>を埋めるだけで用意できます。</div>
+  </div>
+</section>
+
+<!-- ===== テンプレート集 ===== -->
+<section class="section" id="templates">
+  <div class="section__inner fi">
+    <span class="eyebrow">Templates</span>
+    <h2>テンプレート集</h2>
+    <p>会議の「持ち物」を<b>埋めるだけ</b>で用意できる記入式テンプレです。保存したファイルを次工程のスキルに読み込ませます。</p>
+    <div class="note"><span class="material-icons" style="vertical-align:middle;color:var(--color-accent)">edit_note</span> <b><a href="templates/template-form.html">入力フォーム（HTML）を開く →</a></b>　ブラウザで入力 → 「CSVに出力」ボタンで保存（自動保存つき）。CSVは <code>項目,内容</code> の2列・Excel対応で、Claude Code がそのまま読み込めます。<br><small>テキストで見たい場合は下表の各 .md（同じ内容）を使ってください。</small></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程</th><th>テンプレ（持ち物）</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">①</span></td><td><a href="templates/00_立ち上げの10の問い.md">00_立ち上げの10の問い.md</a></td><td>キックオフで目線合わせ（インセプションデッキのやさしい版）</td></tr>
+          <tr><td><span class="badge">①</span></td><td><a href="templates/00b_着手ゲート.md">00b_着手ゲート.md</a></td><td>着手のGo/No-Go判定（MUST条件が揃ったら着手）</td></tr>
+          <tr><td><span class="badge--accent badge">ガ</span></td><td><a href="templates/情シス確認チェックリスト.md">情シス確認チェックリスト.md</a></td><td>AI利用前の情シス確認（機密3原則・最小権限）</td></tr>
+          <tr><td><span class="badge">①</span></td><td><a href="templates/01_構想メモ.md">01_構想メモ.md</a></td><td>目的・価値KPI・適合性チェック・進む/止まる判断</td></tr>
+          <tr><td><span class="badge">②</span></td><td><a href="templates/02_立上げメモ.md">02_立上げメモ.md</a></td><td>体制・製品の目標・やることリスト・CLAUDE.md項目</td></tr>
+          <tr><td><span class="badge">③</span></td><td><a href="templates/03_仕様メモ.md">03_仕様メモ.md</a> ★最重要</td><td>今回の目標・仕様・不確実性（④⑤が読み込む）</td></tr>
+          <tr><td><span class="badge">③</span></td><td><a href="templates/03b_スプリントボード.md">03b_スプリントボード.md</a></td><td>タスク分解・担当割り当て（人/AI）・見積り・状態</td></tr>
+          <tr><td><span class="badge">⑥</span></td><td><a href="templates/06_レビュー結果.md">06_レビュー結果.md</a></td><td>コア5観点＋深掘り4観点（保守性/エラー処理/依存/構成）・重要度タグ(🔴🟡🟢)・推奨アクション・ゲート確認・お披露目・合否</td></tr>
+          <tr><td><span class="badge">⑧</span></td><td><a href="templates/08_ふりかえり.md">08_ふりかえり.md</a></td><td>事実・AI活用・DORA点検・価値測定・改善1〜3</td></tr>
+          <tr><td><span class="badge">⑧</span></td><td><a href="templates/メトリクス計測シート.md">メトリクス計測シート.md</a></td><td>チームの調子を測る4つの数字（価値を数字で）</td></tr>
+          <tr><td><span class="badge">①⑧</span></td><td><a href="templates/KPI・OKRトラッキング.md">KPI・OKRトラッキング.md</a></td><td>価値・KPIをOKR/KRで継続トラッキング（現在値・差分・次の一手）</td></tr>
+          <tr><td><span class="badge">⑥⑦</span></td><td><a href="templates/セキュリティ点検＆ツール導入ゲート.md">セキュリティ点検＆ツール導入ゲート.md</a></td><td>シークレット漏洩点検・CLAUDE.md/hooks/MCP監査・新ツール導入ゲート・ゼロトラスト</td></tr>
+          <tr><td><span class="badge">報告</span></td><td><a href="templates/報告書（週次・成果）.md">報告書（週次・成果）.md</a></td><td>週次報告・成果/実証報告（関係者向け・数字と次の一手）</td></tr>
+          <tr><td><span class="badge">運営</span></td><td><a href="templates/議事録.md">議事録.md</a></td><td>デイリー/レビュー/打合せの議事録（決定・To-Do・次回）</td></tr>
+          <tr><td><span class="badge">報告</span></td><td><a href="templates/自動報告設定.md">自動報告設定.md</a></td><td>自動報告（日次・週次・月次）の要否・タイミング・報告先・読み取り元・送信アダプタ・1ランナー集約・承認/安全</td></tr>
+          <tr><td><span class="badge">報告</span></td><td><a href="templates/自動報告_レポート様式.md">自動報告_レポート様式.md</a></td><td>レポートの中身（開発チーム社内向け・やさしい日本語・表/図解中心）。朝会=動き・詰まり・重複衝突／週次=反復の健康診断／月次=傾向。<b>定例はPMツールの定例チケットを日程の正本に</b>（種別ごとに自動でチケットへコメント＋通知）。<b>ツール非依存</b>（Redmine/Jira/Backlog/GitHub Issues…読み取りアダプタを差し替えるだけ）。<b>原本はリポジトリのmd</b>（<code>docs/報告/</code>）＝チャット/チケットは派生ビュー。<b>KPIはPMツールのWikiにダッシュボード表示</b>（毎日上書き・自動算出＋業務KPI／未更新は「未更新」）。関係者向けは価値KPIダイジェスト派生</td></tr>
+          <tr><td><span class="badge">②③⑥</span></td><td><a href="templates/完成の定義・着手の定義（DoD・DoR）.md">完成の定義・着手の定義（DoD・DoR）.md</a></td><td>チーム共通のDoD（完成）・DoR（着手）。一度決めて全スプリントで使う</td></tr>
+          <tr><td><span class="badge">②⑦</span></td><td><a href="templates/リリース計画・ロードマップ.md">リリース計画・ロードマップ.md</a></td><td>MVP→継続リリースの複数スプリント全体像（狙うKPI・時期）。ローリング更新</td></tr>
+          <tr><td><span class="badge">④⑧</span></td><td><a href="templates/ナレッジログ.md">ナレッジログ.md</a></td><td>知見の蓄積・活用（設計判断/つまずき/効いたプロンプト/既知課題）。キット同梱・外部不要</td></tr>
+          <tr><td><span class="badge">⑧</span></td><td><a href="templates/コスト・予算 予実.md">コスト・予算 予実.md</a></td><td>（任意・受託/実証）工数・外部コストの予実と着地見込み</td></tr>
+          <tr><td><span class="badge--accent badge">進行</span></td><td><a href="templates/agile-state.md">agile-state.md</a></td><td>進行役の現在地・決定事項の記録（迷子防止）</td></tr>
+          <tr><td><span class="badge">運営/⑧</span></td><td><a href="templates/記録棚卸しチェックリスト.md">記録棚卸しチェックリスト.md</a></td><td>追記型の記録mdを定期棚卸し（3層＝先頭サマリ/本体/アーカイブ・重複統合・陳腐化削除）。検出ヘルパー同梱。自動化はオプトイン＋終了条件</td></tr>
+          <tr><td><span class="badge">終了</span></td><td><a href="templates/プロジェクト終了チェックリスト.md">プロジェクト終了チェックリスト.md</a></td><td>完了/中止時の撤収：自動化停止＋シークレット失効＋権限/MCP撤収＋最終アーカイブ＋引き継ぎ（走りっぱなしを残さない）</td></tr>
+          <tr><td><span class="badge--accent badge">改善</span></td><td><a href="templates/フィードバック.md">フィードバック.md</a></td><td>キットへの感想・要望・不具合（→feedback-logへ）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>使い方の例：</b>③の <a href="templates/03_仕様メモ.md">仕様メモ</a> をコピー → <code>docs/03_計画・設計/ログイン機能.md</code> に保存して埋める → ④で「<code>docs/03_計画・設計/ログイン機能.md</code> を読み込んで実装して」と渡す。④製造・⑤テストの成果物はコード自体なのでテンプレ不要です。</div>
+    <div class="note"><span class="material-icons" style="vertical-align:middle;color:var(--color-primary)">lightbulb</span> <b>埋め方に迷ったら「記入例」を見る：</b><a href="examples/記入例_構想メモ.md">構想メモ</a>／<a href="examples/記入例_仕様メモ.md">仕様メモ</a>／<a href="examples/記入例_スプリントボード.csv">スプリントボード</a>／<a href="examples/記入例_ふりかえり.md">ふりかえり</a>（ログイン機能の例で埋めた見本）。<br>自動チェックを仕掛けたい人は <a href="examples/検証ゲートの例_Hooks.md">検証ゲートの例（Hooks）</a> を参照。</div>
+  </div>
+</section>
+
+<!-- ===== 導入チェックリスト ===== -->
+<section class="section" id="checklist">
+  <div class="section__inner fi">
+    <span class="eyebrow">Checklist</span>
+    <h2>導入チェックリスト</h2>
+
+    <span class="group-label">立上げ時</span>
+    <ul class="checklist">
+      <li><span class="material-icons">check_circle</span>アジャイルの向き不向きを契約前チェックリストで確認した</li>
+      <li><span class="material-icons">check_circle</span>製品責任者・進行支援役・開発チームを決めた</li>
+      <li><span class="material-icons">check_circle</span>製品の目標と最初の機能要望リストがある</li>
+      <li><span class="material-icons">check_circle</span>CLAUDE.md に build/test コマンド・規約・作法を簡潔に書いた</li>
+    </ul>
+
+    <span class="group-label">サイクル運用時</span>
+    <ul class="checklist">
+      <li><span class="material-icons">check_circle</span>今回の目標を言葉にした</li>
+      <li><span class="material-icons">check_circle</span>実装前に仕様（関係ファイル/関数/対象外/確認手順）を書いた</li>
+      <li><span class="material-icons">check_circle</span>小さく作っている</li>
+      <li><span class="material-icons">check_circle</span>テストを先に書いた（失敗→成功）— /tdd-ai で実行</li>
+      <li><span class="material-icons">check_circle</span>完成の条件にSQuaRE品質・セキュリティ要件を含めた</li>
+    </ul>
+
+    <span class="group-label">品質・セキュリティゲート（マージ前必須）</span>
+    <ul class="checklist">
+      <li><span class="material-icons">check_circle</span>脆弱性検査（SAST/SCA）を通過（OWASP Top10・存在しない部品を検査）</li>
+      <li><span class="material-icons">check_circle</span>第三者視点レビュー（別の文脈）を実施した</li>
+      <li><span class="material-icons">check_circle</span>文法/型/テストが検証ゲートで強制され成功している</li>
+      <li><span class="material-icons">check_circle</span>AIプロダクトはAIセーフティ評価10観点を確認</li>
+    </ul>
+
+    <span class="group-label">リリース・改善</span>
+    <ul class="checklist">
+      <li><span class="material-icons">check_circle</span>脆弱性対応プロセスを運用に組み込んだ</li>
+      <li><span class="material-icons">check_circle</span>ふりかえりでDORA 7つの能力を点検した</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 運用方法 ===== -->
+<section class="section" id="ops">
+  <div class="section__inner fi">
+    <span class="eyebrow">Operation</span>
+    <h2>運用方法</h2>
+    <h3><span class="material-icons">download</span>新規プロジェクトへのセットアップ（配布ZIPから）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>手順</th><th>やること</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">1</span></td><td>配布された <code>ai-agile-kit.zip</code> を<b>解凍</b>する（中に <code>SETUP.md</code> あり）</td></tr>
+          <tr><td><span class="badge">2</span></td><td>対象プロジェクトで Claude Code を開き、解凍した <code>ai-agile-kit</code> を渡して「<code>skills/</code> の中身を <code>.claude/skills/</code> に、<code>docs/</code> の中身を <code>docs/</code> に配置して」と頼む（手動でコピーしてもよい）</td></tr>
+          <tr><td><span class="badge">3</span></td><td>Claude Code を<b>再起動</b>し、<code>/agile-inception</code> が使えるか確認</td></tr>
+          <tr><td><span class="badge">4</span></td><td>プロジェクト開始時、まず <code>/agile-inception</code> から起動</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">詳しい手順は配布ZIP内の <code>SETUP.md</code> を参照。スキルは <code>.claude/skills/&lt;名前&gt;/SKILL.md</code> の形に置くこと（フォルダ直下に SKILL.md が無いと認識されません）。</div>
+    <h3><span class="material-icons">repeat</span>1サイクルの回し方</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>順</th><th>スキル</th><th>完了の合図</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><code>/agile-sprint-planning</code></td><td>今回の目標＋仕様が実装に渡せる状態</td></tr>
+          <tr><td>2</td><td><code>/agile-ai-implementation</code></td><td>動く成果物ができ、安全確認済み</td></tr>
+          <tr><td>3</td><td><code>/tdd-ai</code></td><td>テストが緑、完成の条件を満たす</td></tr>
+          <tr><td>4</td><td><code>/agile-review-security</code></td><td>第三者視点レビュー通過・脆弱性検査済み</td></tr>
+          <tr><td>5</td><td><code>/agile-retrospective</code></td><td>次サイクルの改善を1〜3個決定 → ③へ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>原則：</b>各工程には「完成条件」があります。満たすまで次へ進まない。AI単独で「完了」にせず、テストとレビューで必ず検証します。</div>
+
+    <h3><span class="material-icons">restart_alt</span>新規 / 既存での進め方</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>パターン</th><th>進め方</th></tr></thead>
+        <tbody>
+          <tr><td><b>新規</b>（ゼロから）</td><td>アイデア段階なら<code>/agile-inception</code>（①）から。要件が見えていれば②→③へ。</td></tr>
+          <tr><td><b>既存</b>（もう動いている）</td><td>いきなりスプリントに入れず、<b>まず現状を把握</b>（README/git履歴/既存課題/テスト・CI/リリース頻度/チームの今のやり方を読む）→ 8工程にマッピングして<b>欠けている所だけ最小限から補い</b>、<b>次の1スプリント</b>から③で合流。既存の良い習慣は置き換えず接続。<br>※詳細は <code>/agile-coach</code> の <code>references/brownfield.md</code>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">hub</span>各種ツールとの連携（役割ごと。1つとは限らない）</h3>
+    <p>ツールは1つに統合されている場合も、<b>役割ごとに別々</b>（VCS=GitLab／課題=Jira／スケジュール=MS Project…）の場合もあります。<b>役割ごとに「何の正本か」を決めて</b>、本キットの成果物を割り当てます。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>役割</th><th>扱う情報</th><th>本キットの成果物</th><th>ツール例</th></tr></thead>
+        <tbody>
+          <tr><td>バージョン管理</td><td>コード・ブランチ・PR</td><td>④の差分</td><td>Git/GitHub・GitLab・Bitbucket・SVN</td></tr>
+          <tr><td>課題管理</td><td>タスク・担当・状態</td><td>スプリントボードの各タスク</td><td>Jira・Redmine・Backlog・GitHub Issues</td></tr>
+          <tr><td>プロジェクト管理（ボード）</td><td>WIP可視化・進捗</td><td>スプリントボード</td><td>Jira board・Trello・Asana・Notion</td></tr>
+          <tr><td>スケジュール管理</td><td>期日・マイルストーン</td><td>スプリント期間・締切</td><td>MS Project・Backlogガント・カレンダー</td></tr>
+          <tr><td>ドキュメント</td><td>仕様・KPI・議事録</td><td>仕様メモ・構想メモ・KPI</td><td>Confluence・Notion・Google Docs・docs/</td></tr>
+          <tr><td>チャット／通知</td><td>連絡・宣言・通知</td><td>デイリーの宣言</td><td>Slack・Teams・Discord</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>連携できていれば"登録"までやります：</b>②の<b>バックログを課題/チケットに</b>、③の<b>スプリント計画（反復作成＋タスクのチケット化＋担当割当＋ボード配置）</b>、スケジュールがあれば期間・締切も、ツールに登録します。<b>書き込みは登録前に一覧を出して確認</b>・既存は重複作成しない・認証情報は出さない。連携が無ければCSV/ローカルで運用。</div>
+    <div class="note" style="border-left-color:#0E9F9F"><b>★予定工数を必ず入れる（予実管理の必須ルール）：</b>スプリントに限らず<b>計画して起票したら、各チケットに「予定工数」（Redmineなら <code>estimated_hours</code>）を必ず登録</b>します（空起票しない）。規模→工数は換算表（既定 大8h/中4h/小2h、<code>agile-state.md</code>に記録）。予定日程も入れ、実績は完了時に別途記録＝予実の差分が見えます。課題管理がRedmineのときの手順は <code>/agile-coach</code> の <code>references/redmine.md</code>。</div>
+    <div class="note"><b>ツールが分かれている時の3原則（二重管理を防ぐ）：</b>①<b>1つの情報に正本を1つだけ</b>決める ②ツール同士は<b>リンクで繋ぐ</b>（コミット/PRに課題番号、カードに課題リンク…コピペで二重に持たない）③<b>「今だれが何に着手済みか」を見る場所を1つに固定</b>（ふつう課題管理かボード）。これさえ守れば重複は防げます。詳細：<code>/agile-coach</code> の <code>references/tool-integration.md</code>。</div>
+    <div class="note" style="font-size:0.82rem"><b>安全第一：</b>接続・外部送信は許可を得てから。認証情報は画面・コミットに出さない。書き込みは事前確認。連携できなければCSV/テンプレ運用でカバー（ツール未定でも今すぐ始められます）。</div>
+    <div class="note" style="border-left-color:#0E9F9F;font-size:0.85rem"><b>MCP活用（オプトイン＝顧客/環境が許可すれば）：</b>使えると加速します。<b>Playwright</b>（⑤⑥のE2E/動作確認・スクショ）／<b>context7</b>（④の最新ライブラリ確認・ハルシネーション対策）／<b>PMツール・チャット・監視</b>（②③⑦⑧・通知）。<b>MCPは加速オプションで、無くても全工程が回ります</b>（手動/CSV/CLIにフォールバック）。<b>導入前に必ず導入ゲート</b>（<code>templates/セキュリティ点検＆ツール導入ゲート.md</code>）＋機密3原則。手順は <code>references/mcp-usage.md</code>。</div>
+
+    <h3><span class="material-icons">group_work</span>「同じものを二人が作る」を防ぐ（複数人開発）</h3>
+    <p>複数人開発で重複が起きるのは<b>「誰が何をやっているか見えない」</b>とき。下の柱で見える化して防ぎます。全文：<a href="GitHub運用_重複防止ガイド.md">GitHub運用_重複防止ガイド.md</a></p>
+    <div class="note" style="font-size:0.82rem"><b>GitHubは"一例"です（前提ではありません）。</b>大事なのは「担当を1人に・着手を見せる・デイリーで宣言」という考え方で、これは<b>他ツール（GitLab/Backlog等）でも、ツールが無くても</b>同じ。GitHub以外の読み替えはガイド§8、ツールは未定でも<b>スプリントボードCSV＋デイリーで今すぐ始められます</b>。</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>柱</th><th>やること（公式ベース）</th></tr></thead>
+        <tbody>
+          <tr><td>① 着手宣言</td><td>作業前に<b>Issueを作り、自分を担当(Assignee)に</b>。未担当を見れば空き作業が分かる</td></tr>
+          <tr><td>② 1作業1ブランチ</td><td>短く説明的な名前（例 <code>add-login-validation</code>）。名前で進行中が見える</td></tr>
+          <tr><td>③ 早く見せる</td><td>着手したら<b>Draft PR（下書きPR）＋ <code>Closes #123</code></b>で「やってます」を可視化</td></tr>
+          <tr><td>④ ボードで可視化</td><td>GitHub Projectsで やること/作業中/完了（③スプリントボードと対応）</td></tr>
+          <tr><td>⑤ mainを守る</td><td>ブランチ保護（PR必須・承認1件・必須チェック）＋ Actions(CI)で自動テスト</td></tr>
+          <tr><td>⑥ 担当境界</td><td><b>CODEOWNERS</b>で <code>src/auth/</code>・<code>tests/</code> 等の担当を宣言（設定例同梱）</td></tr>
+          <tr><td>⑦ 毎日の宣言</td><td>デイリーで「今日のタスク(Issue)・触る所・openブランチ」を共有。同じ場所はペアで</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">設定例：<a href="examples/CODEOWNERS.sample">CODEOWNERS.sample</a>／<a href="examples/ci-workflow.yml.sample">ci-workflow.yml.sample</a>。出典はGitHub Docs・Scrum Guide 2020・DORA・Martin Fowler（ガイド末尾に記載）。</div>
+  </div>
+</section>
+
+<!-- ===== 自動報告・KPIダッシュボード ===== -->
+<section class="section" id="reporting">
+  <div class="section__inner fi">
+    <span class="eyebrow">Auto Report</span>
+    <h2>自動報告・KPIダッシュボード</h2>
+    <p>各種の定期報告（<b>日次＝朝会／週次／月次</b>）と<b>定例</b>（成果デモ会・ふりかえり）に合わせて、レポートを自動で作成・送付します。<b>立上げ時に進行役 <code>/agile-coach</code> が「要否 → タイミング → 報告先」を確認</b>し、必要なら設定します。手順は <code>references/reporting.md</code>、設定は <code>templates/自動報告設定.md</code>、中身は <code>templates/自動報告_レポート様式.md</code>。</p>
+
+    <h3><span class="material-icons">groups</span>読み手と中身（開発チーム社内が主）</h3>
+    <div class="note" style="border-left-color:#0E9F9F"><b>社内向け＝動き・詰まり・遅れの予兆・重複/衝突が主役。</b>価値・KPIの訴求は関係者向けの派生に回します。<b>やさしい日本語</b>（アジャイル語は括弧で初出だけ：反復（スプリント）・残り作業の減り具合（バーンダウン）等）、<b>表・図解中心／文章は補足</b>。図解は文字バー（<code>████░░ 60%</code>）で画像不要。</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>頻度／定例</th><th>中身（社内向け・進捗中心）</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge">日次</span> 朝会</td><td>ボード状況・メンバー別（今日やる/触る所/詰まり）・<b>重複/衝突の兆候</b>。朝会の事前資料</td></tr>
+        <tr><td><span class="badge">週次</span> 反復の健康診断</td><td>残り作業の減り具合・このままいくと終わる見込み・滞留（確認待ち/放置PR/持ち越し）→次の一手</td></tr>
+        <tr><td><span class="badge">月次</span> 傾向と健康度</td><td>進む速さ等の推移・改善の効き・負債（KPIは関係者向け派生に）</td></tr>
+        <tr><td><span class="badge">定例</span> レビュー/レトロ</td><td>成果デモ会＝完了一覧／ふりかえり＝点検＋改善（社内向け・<b>個人評価に使わない</b>）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="material-icons">layers</span>しくみは3レイヤー（ツール非依存）</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>レイヤー</th><th>役割</th><th>選べるもの（差し替え可）</th></tr></thead>
+      <tbody>
+        <tr><td>① 起動役（スケジューラ）</td><td>定時に動かす</td><td><b>GitHub Actions schedule</b>（チーム第一候補）／常時ON1台のcron・タスクスケジューラ／クラウド</td></tr>
+        <tr><td>② 読み取り元（PMツール）</td><td>状況を読む</td><td><b>Redmine</b>／Jira／Backlog／GitHub Issues…（<b>読み取りアダプタを差し替えるだけ</b>。GitHub以外でもAPIで読める）</td></tr>
+        <tr><td>③ 送信先</td><td>届ける</td><td>Teams／Slack（Incoming Webhook）／メール／PMツールのWiki・チケット</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><b>定例チケット駆動（推奨）：</b>PMツールの<b>定例チケットを「開催日程の正本＋レポートの置き場＋議事録の土台」</b>にします。起動役は毎営業日tickし、<b>「今日が開催日の定例チケット」</b>を探して、種別（朝会/週次/月次/レビュー/レトロ）に合うレポートを生成→<b>チケットにコメント＋チャット通知</b>。日程変更はチケットの開催日を直すだけ（cron不変）。※SaaSは自分からpushできないため“見にいく”方式。</div>
+
+    <h3><span class="material-icons">save</span>原本はリポジトリのmd（KPIはWikiに日々表示）</h3>
+    <div class="table-wrap"><table>
+      <tbody>
+        <tr><td><b>レポート原本</b></td><td><b>リポジトリの md</b>（<code>docs/報告/報告_週次_日付.md</code>）。チャット・チケット・メールは<b>原本から作る派生ビュー</b>（内容を持ち回らない＝1情報1正本）</td></tr>
+        <tr><td><b>KPIダッシュボード</b></td><td>PMツールの<b>Wikiに1ページ作り毎日上書き</b>。<b>自動算出</b>（進む速さ・完了件数・進捗率・リードタイム・工数予実＝ツールから計算）＋<b>業務KPI</b>（<code>KPI・OKRトラッキング.md</code> の目標→現在→差分。<b>未更新なら「未更新」と表示＝数値を創作しない</b>）</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="note" style="border-left-color:#0E9F9F"><b>チーム運用の鉄則：</b>自動送信は<b>“1つの共有ランナー”だけ</b>で動かす（各メンバーのPCでcronを回すと多重送信・シークレット散在）。<b>初回は必ずドライランで人が確認</b>してから自動化。<b>安全</b>：Webhook URL・APIキーはsecretsに集約し画面・コミットに出さない／本番データ・個人情報は載せない（要約）／<b>個人の監視にしない</b>。</div>
+    <div class="note" style="font-size:0.82rem"><b>実サンプル（GitHub Actions×Redmine／worked example）：</b><a href="examples/自動報告_GitHubActions_redmine.yml.sample">自動報告_GitHubActions_redmine.yml.sample</a>＋<a href="examples/自動報告_redmine_to_chat.py.sample">自動報告_redmine_to_chat.py.sample</a>。別ツールは <code>reporting.md</code>「読み取り元アダプタ」表に沿って数行差し替え。</div>
+  </div>
+</section>
+
+<!-- ===== 技術スタックの扱い ===== -->
+<section class="section" id="stack">
+  <div class="section__inner fi">
+    <span class="eyebrow">Tech Stack</span>
+    <h2>技術スタックの扱い（適応型）</h2>
+    <p>スタックは事前に固定せず、<b>工程④が実装着手時に確定</b>。一度決めたら <code>CLAUDE.md</code> に記録し、以降の工程が聞き直しません。</p>
+    <div class="flow">
+      <div class="flow__row">
+        <div class="node"><b>② 立上げ</b><small>CLAUDE.md に「## 技術スタック」欄を用意（未定なら空欄）</small></div>
+      </div>
+      <div class="arrow-down"><span class="material-icons">south</span></div>
+      <div class="flow__row">
+        <div class="node node--loop"><b>④ 実装（ステップ0）</b><small>CLAUDE.md → 既存コード → ユーザーへ質問 の順で確定し、書き戻す</small></div>
+      </div>
+      <div class="arrow-down"><span class="material-icons">south</span></div>
+      <div class="flow__row">
+        <div class="node node--outer"><b>⑤ /tdd-ai</b><small>frontend/backend/ai-guard で対応</small></div>
+        <div class="node node--outer"><b>⑥ レビュー</b><small>記録済みスタックで脆弱性検査を寄せる</small></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>確定の順序</th><th>参照先</th></tr></thead>
+        <tbody>
+          <tr><td>1st</td><td><code>CLAUDE.md</code> の <code>## 技術スタック</code></td></tr>
+          <tr><td>2nd</td><td>既存コード（<code>package.json</code> / <code>requirements.txt</code> / <code>go.mod</code> 等）</td></tr>
+          <tr><td>3rd</td><td>ユーザーへ質問（フロント／バックエンド／DB／制約）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">スタック非依存の工程（①③⑧）はスタックを問いません。スタック固有のルールを作りすぎず、実際に使うものだけに絞ります。</div>
+  </div>
+</section>
+
+<!-- ===== 困ったとき（FAQ） ===== -->
+<section class="section" id="faq">
+  <div class="section__inner fi">
+    <span class="eyebrow">FAQ</span>
+    <h2>困ったとき（よくある質問）</h2>
+    <p>つまずきやすい所と対処です。全部は <a href="FAQ_よくある質問.md">FAQ_よくある質問.md</a> に。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>こんなとき</th><th>こうする</th></tr></thead>
+        <tbody>
+          <tr><td>スキルが反応しない／別のが動く</td><td><b>/スキル名 で呼ぶ</b>＋Claude Code を再起動</td></tr>
+          <tr><td>どのスキルか分からない</td><td><code>/agile-coach</code>（進行役）に任せる</td></tr>
+          <tr><td>AIが作り込みすぎる</td><td>仕様メモに<b>「やらないこと」</b>を書く＋小さく頼む</td></tr>
+          <tr><td>AIがテストを飛ばす</td><td>「先にテストを書いて」と明示／<code>/tdd-ai</code></td></tr>
+          <tr><td>既存に入れたら反発された</td><td>一度に変えず<b>次の1スプリントから小さく</b>（/agile-coach 既存導入）</td></tr>
+          <tr><td>価値が出ているか不明</td><td>①のKPIを⑧で測る（メトリクス計測シート）</td></tr>
+          <tr><td>CSVがExcelで文字化け</td><td>UTF-8で出力済み。Excelは「データ→テキストから」でUTF-8指定</td></tr>
+          <tr><td>フォームの入力が消えた</td><td>同じブラウザなら自動保存。念のため<b>CSVに出して保存</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== フィードバック ===== -->
+<section class="section" id="feedback">
+  <div class="section__inner fi">
+    <span class="eyebrow">Feedback</span>
+    <h2>フィードバック（キットを良くする）</h2>
+    <p>使ってみて「使いにくい・わからない・バグ・要望・良かった」を送ってください。<b>匿名OK・重要度だけ必須。</b>ためた声は改善に回します。<b>正本は</b> <code>docs/feedback/feedback-log.md</code>。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>送り方</th><th>やること</th></tr></thead>
+        <tbody>
+          <tr><td><b>その場で（おすすめ）</b></td><td><code>/agile-coach</code> に「フィードバック」「使いにくい」と言う → 3問だけ聞かれて自動でログに追記</td></tr>
+          <tr><td>じっくり書く</td><td>入力フォームの「フィードバック」タブ（<a href="templates/template-form.html">template-form.html</a>）→ CSV出力 ／ または <a href="templates/フィードバック.md">フィードバック.md</a></td></tr>
+          <tr><td>GitHubを使うなら</td><td><code>feedback</code> ラベルでIssue（テンプレ：<a href="examples/github-issue-template_kit-feedback.md">github-issue-template_kit-feedback.md</a>）</td></tr>
+          <tr><td>Slack/Teamsがあれば</td><td>連携できれば要約を自動投稿（許可制）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="font-size:0.85rem"><b>集める→回す：</b>週次orスプリント末にログを確認 → 重要度 高→中→低 でトリアージ → 反映・版up。<b>捨てない・透明に</b>（対応も見送りも状態に残す）。「良かった」も拾って、削っちゃダメな所を把握します。</div>
+  </div>
+</section>
+
+<!-- ===== PMBOK7原則レイヤー ===== -->
+<section class="section" id="pmbok">
+  <div class="section__inner fi">
+    <span class="eyebrow">Foundation</span>
+    <h2>PMBOK7 原則レイヤー</h2>
+    <p>8工程は「作り方（How）」。その土台に PMI公式 <b>PMBOK 第7版（2021・ANSI標準）の12原則</b> を「なぜそうするか（Why）」として敷きます。</p>
+    <div class="note"><b>PMBOK（ピンボック）とは？</b> 世界で広く使われている<b>プロジェクト管理の標準的な知識集</b>（PMI＝米国の専門機関がまとめたもの）。第7版は「こう作業せよ」という手順集から、「どんな案件にも効く<b>12の原則</b>」へと進化しました。<br>この章は、<b>本ガイドの8工程（やり方）が、その世界標準の原則とちゃんと噛み合っているか</b>を確かめるものです。英語名はそのまま載せていますが、<b>横の日本語の意味</b>がつかめれば十分です。</div>
+
+    <h3><span class="material-icons">checklist_rtl</span>12原則 × 本ガイドの対応</h3>
+    <p style="font-size:0.85rem;color:var(--color-text-sub)">「PMBOKが大事にしている12のこと」と、「本ガイドのどこでそれをやっているか」の対応です。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>原則（ざっくりの意味）</th><th>本ガイドのどこで実践？</th></tr></thead>
+        <tbody>
+          <tr><td>① <b>誠実な管理</b>（Stewardship）<br><small>任されたものを責任を持って扱う</small></td><td>ガバナンス章／AI利用の倫理・コンプライアンス</td></tr>
+          <tr><td>② <b>協力し合うチーム</b>（Team）<br><small>協働できる環境をつくる</small></td><td>工程②の体制・各工程のペルソナ</td></tr>
+          <tr><td>③ <b>関係者を巻き込む</b>（Stakeholders）<br><small>先回りして関わる</small></td><td>工程②体制＋⑥成果デモ会で先回り関与・価値確認</td></tr>
+          <tr><td>④ <b>価値を大事にする</b>（Value）<br><small>作った量より"成果"で測る</small></td><td>工程①でKPI定義・⑧で価値測定</td></tr>
+          <tr><td>⑤ <b>全体で考える</b>（Systems Thinking）<br><small>部分最適でなくつながりで見る</small></td><td>体系全体（外枠×反復の二層）</td></tr>
+          <tr><td>⑥ <b>リーダーらしく</b>（Leadership）<br><small>役職に関係なく振る舞う</small></td><td>工程②の役割・進行支援役</td></tr>
+          <tr><td>⑦ <b>やり方を調整する</b>（Tailoring）<br><small>状況に合わせて過不足なく</small></td><td>下記テーラリング宣言</td></tr>
+          <tr><td>⑧ <b>品質を作り込む</b>（Quality）<br><small>後付けでなく最初から</small></td><td>工程⑤⑥（DoD・脆弱性検査・/tdd-ai）</td></tr>
+          <tr><td>⑨ <b>複雑さを乗りこなす</b>（Complexity）<br><small>絡まりを見極める</small></td><td>工程③の不確実性洗い出し・依存把握</td></tr>
+          <tr><td>⑩ <b>リスクに対応する</b>（Risk）<br><small>危険も好機も扱う</small></td><td>工程③不確実性・④⑤⑥のセキュリティ</td></tr>
+          <tr><td>⑪ <b>変化に強くなる</b>（Adaptability & Resiliency）<br><small>適応し、失敗から立ち直る</small></td><td>短期サイクルの反復・⑧改善・小さく作る</td></tr>
+          <tr><td>⑫ <b>変化を後押しする</b>（Change）<br><small>目指す姿への移行を支える</small></td><td>⑧でAI活用の定着・進め方の見直し</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">tune</span>テーラリング宣言（just enough）</h3>
+    <div class="note">本ガイドは固定手順書ではなく、<b>コンテキストに応じて"ちょうど十分"に調整して使う</b>。工程①〜④・⑧は共通。<b>⑤テスト・品質保証は必須（省略しない）</b>。適用強度を調整してよいのは主に⑦リリース・運用。小規模・低リスク案件では工程を統合・簡略化してよいが、<b>テストは外さない</b>。過剰なプロセスは価値を生まない。</div>
+    <div class="note" style="font-size:0.85rem"><b>📄 ドキュメントも"ちょうど十分"に（増やしすぎない）。</b>作る前に4問：①決定や行動を変えるか ②正本は1つか ③二重メンテ（md＋html等）になっていないか ④空の雛形を文書として数えていないか。同一テーマの細分化は<b>統合</b>、増えすぎは⑧ふりかえりで点検。</div>
+
+    <h3><span class="material-icons">grade</span>8つの注目ポイント（パフォーマンスドメイン）の充足</h3>
+    <p style="font-size:0.85rem;color:var(--color-text-sub)">PMBOK7が「プロジェクトで見るべき8つの観点」。本ガイドがどれだけカバーできているかの自己評価です。<br>凡例：<span class="badge">◎</span> 十分 ／ <span class="badge--accent badge">○</span> 部分的（補強の余地あり）</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>注目ポイント（意味）</th><th>充足</th><th>主担当工程</th></tr></thead>
+        <tbody>
+          <tr><td>進め方と工程の選び方（開発アプローチとライフサイクル）</td><td><span class="badge">◎</span></td><td>体系全体</td></tr>
+          <tr><td>実行と価値提供（Project Work / Delivery）</td><td><span class="badge">◎</span></td><td>④⑤⑥⑦</td></tr>
+          <tr><td>品質（Quality）</td><td><span class="badge">◎</span></td><td>⑤⑥</td></tr>
+          <tr><td>関係者（Stakeholders）</td><td><span class="badge--accent badge">○</span></td><td>②⑥</td></tr>
+          <tr><td>計画（Planning）</td><td><span class="badge--accent badge">○</span></td><td>③（<b>スプリント計画に限定</b>。見積り・リリース計画・調達は範囲外）</td></tr>
+          <tr><td>測定（Measurement）</td><td><span class="badge--accent badge">○</span></td><td>⑧（価値測定）</td></tr>
+          <tr><td>不確実性（Uncertainty）</td><td><span class="badge--accent badge">○</span></td><td>③（<b>脅威中心</b>。機会の活用は今後）</td></tr>
+          <tr><td>チーム（Team）</td><td><span class="badge--accent badge">○</span></td><td>②＋各ペルソナ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="material-icons">gpp_good</span>守るべき原則（ガバナンス＝Stewardship）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>原則</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td>倫理・コンプライアンス</td><td>AI事業者ガイドライン第1.1版に沿い、AIの一生全体でリスクを認識・対策</td></tr>
+          <tr><td>機密保持</td><td>機密・個人情報・著作物をAIに渡さない線引きを工程①で決め全工程で守る</td></tr>
+          <tr><td>説明責任</td><td>根拠を引用／知識／推測／不明で区別し、推測を断定しない</td></tr>
+          <tr><td>人間の最終責任</td><td>出荷・意思決定の責任は人間（工程⑥）。「検証できないものは出荷しない」</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.8rem;color:var(--color-text-sub)">出典：PMI「12 Principles of Project Management」(©2021 PMI) ／ PMBOK Guide 7th Edition FAQs。8ドメインの逐語名称は一部 PMI許諾資料で確認（確信度95%）。</p>
+  </div>
+</section>
+
+<!-- ===== IPA×工程マッピング ===== -->
+<section class="section" id="mapping">
+  <div class="section__inner fi">
+    <span class="eyebrow">Mapping</span>
+    <h2>IPA提言 × 各工程 マッピング</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工程</th><th>紐づくIPA等の公的提言</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge">①</span> 構想・適合性</td><td>モデル契約／契約前チェックリスト</td></tr>
+          <tr><td><span class="badge">②</span> 立上げ・体制</td><td>役割・準委任契約（モデル契約）／DX動向2025（内製・アジャイル・AI）</td></tr>
+          <tr><td><span class="badge--accent badge">④</span> 実装</td><td>安全なウェブサイトの作り方（11脆弱性）／生成AI利用ガイドライン</td></tr>
+          <tr><td><span class="badge" style="background:#22A06B">⑤</span> テスト・品質</td><td>ソフトウェア品質ガイド（SQuaRE）／AIセーフティ評価・レッドチーミング／ML品質(AIST)</td></tr>
+          <tr><td><span class="badge">⑥</span> レビュー・セキュリティ</td><td>（AI実践知）第三者視点レビュー／検証ゲート／Veracode</td></tr>
+          <tr><td><span class="badge">⑦</span> リリース・運用</td><td>脆弱性対応ガイド／AI事業者ガイドライン第1.1版</td></tr>
+          <tr><td><span class="badge">⑧</span> ふりかえり</td><td>（AI実践知）DORA 7つの能力</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 出典一覧 ===== -->
+<section class="section" id="sources">
+  <div class="section__inner fi">
+    <span class="eyebrow">Sources</span>
+    <h2>出典一覧</h2>
+    <h3><span class="material-icons">account_balance</span>IPA・公的機関（一次情報）</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>資料名</th><th>発行・年</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>情報システム・モデル取引・契約書（アジャイル開発版）</td><td>IPA / 2020・2025更新</td><td><a href="https://www.ipa.go.jp/digital/model/agile20200331.html" target="_blank" rel="noopener">ipa.go.jp/digital/model/agile20200331.html</a></td></tr>
+          <tr><td>DX動向2025</td><td>IPA / 2025</td><td><a href="https://www.ipa.go.jp/digital/chousa/dx-trend/dx-trend-2025.html" target="_blank" rel="noopener">ipa.go.jp/digital/chousa/dx-trend/dx-trend-2025.html</a></td></tr>
+          <tr><td>つながる世界のソフトウェア品質ガイド（SQuaRE）</td><td>IPA/SEC / 2015</td><td><a href="https://www.ipa.go.jp/archive/publish/tn20150529.html" target="_blank" rel="noopener">ipa.go.jp/archive/publish/tn20150529.html</a></td></tr>
+          <tr><td>安全なウェブサイトの作り方 第7版</td><td>IPA / 2021</td><td><a href="https://www.ipa.go.jp/security/vuln/websecurity/about.html" target="_blank" rel="noopener">ipa.go.jp/security/vuln/websecurity/about.html</a></td></tr>
+          <tr><td>テキスト生成AIの導入・運用ガイドライン</td><td>IPA / 2024</td><td><a href="https://www.ipa.go.jp/jinzai/ics/core_human_resource/final_project/2024/generative-ai-guideline.html" target="_blank" rel="noopener">ipa.go.jp/jinzai/ics/.../generative-ai-guideline.html</a></td></tr>
+          <tr><td>AIセーフティ評価観点／レッドチーミング手法ガイド</td><td>IPA/AISI / 2024-2025</td><td><a href="https://www.ipa.go.jp/pressrelease/2025/press20250402.html" target="_blank" rel="noopener">ipa.go.jp/pressrelease/2025/press20250402.html</a></td></tr>
+          <tr><td>AI事業者ガイドライン 第1.1版</td><td>総務省・経産省 / 2025</td><td><a href="https://www.soumu.go.jp/main_content/001002576.pdf" target="_blank" rel="noopener">soumu.go.jp/main_content/001002576.pdf</a></td></tr>
+          <tr><td>機械学習品質マネジメントガイドライン 第4版</td><td>AIST（産総研） / 2023</td><td><a href="https://www.digiarc.aist.go.jp/publication/aiqm/guideline-rev4.html" target="_blank" rel="noopener">digiarc.aist.go.jp/publication/aiqm/guideline-rev4.html</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3><span class="material-icons">public</span>アジャイル標準・AI実践知</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>資料名</th><th>発行・年</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>The 2020 Scrum Guide</td><td>Schwaber & Sutherland / 2020</td><td><a href="https://scrumguides.org/scrum-guide.html" target="_blank" rel="noopener">scrumguides.org/scrum-guide.html</a></td></tr>
+          <tr><td>Best practices for Claude Code</td><td>Anthropic / 2025-2026</td><td><a href="https://www.anthropic.com/engineering/claude-code-best-practices" target="_blank" rel="noopener">anthropic.com/engineering/claude-code-best-practices</a></td></tr>
+          <tr><td>State of AI-assisted Software Development（増幅器/7能力）</td><td>DORA/Google / 2025</td><td><a href="https://dora.dev/dora-report-2025/" target="_blank" rel="noopener">dora.dev/dora-report-2025/</a></td></tr>
+          <tr><td>GenAI Code Security Report（45%脆弱）</td><td>Veracode / 2025</td><td><a href="https://www.veracode.com/blog/genai-code-security-report/" target="_blank" rel="noopener">veracode.com/blog/genai-code-security-report/</a></td></tr>
+          <tr><td>Test-First Prompting for Secure AI-Generated Code</td><td>Endor Labs / 2025</td><td><a href="https://www.endorlabs.com/learn/test-first-prompting-using-tdd-for-secure-ai-generated-code" target="_blank" rel="noopener">endorlabs.com/learn/test-first-prompting-...</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">各記述の根拠は <code>docs/ai-agile-playbook.md</code> に <span class="tag">[引用]</span><span class="tag">[知識]</span><span class="tag">[推測(確信度%)]</span><span class="tag">[不明]</span> のラベル付きで明示。定量値（PR短縮率等）は二次情報のため確信度付き推測扱い。</div>
+  </div>
+</section>
+
+</main>
+
+<!-- 更新ルール：正本は docs/ai-agile-playbook.md。内容変更時は先にmdを更新し、本HTMLを追従させる。
+     下の「更新日」は手動更新。md を変えたらこの日付も必ず更新すること。 -->
+<footer class="footer">
+  <p>AI駆動アジャイル開発 実践ガイド＆運用マニュアル ｜ 正本： <code>docs/ai-agile-playbook.md</code>（本HTMLは閲覧用の派生物） ／ スキル： <code>.claude/skills/</code>（8工程）</p>
+  <p>&copy; 2026 社内開発チーム ｜ <b>版 v1.2</b>（2026-06-15）｜ md更新時は版・日付も更新</p>
+</footer>
+
+<script>
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');}});
+},{threshold:0.08});
+document.querySelectorAll('.fi').forEach(el=>observer.observe(el));
+
+// サイドバー：現在地ハイライト＋モバイルで閉じる
+const links=document.querySelectorAll('.sidebar__menu a');
+const sections=document.querySelectorAll('main section, [id="overview"]');
+links.forEach(a=>a.addEventListener('click',()=>{
+  if(window.innerWidth<=900){document.querySelector('.sidebar').classList.remove('open');}
+}));
+const secObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.getAttribute('id');
+      links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
+    }
+  });
+},{rootMargin:'-40% 0px -55% 0px'});
+document.querySelectorAll('main section[id]').forEach(s=>secObserver.observe(s));
+
+// スキル名（/agile-* ・ /tdd-ai）を詳細マニュアルへ自動リンク化
+(function(){
+  const SKILLS=['agile-coach','agile-inception','agile-backlog-setup','agile-sprint-planning','agile-ai-implementation','tdd-ai','agile-review-security','agile-release-ops','agile-retrospective'];
+  document.querySelectorAll('code, .card__skill').forEach(function(el){
+    if(el.closest('a')) return; // すでにリンク内なら飛ばす
+    const m=el.textContent.trim().match(/^\/?(agile-[a-z-]+|tdd-ai)/);
+    if(!m || SKILLS.indexOf(m[1])<0) return;
+    const a=document.createElement('a');
+    a.href='ai-agile-skills_v1.html#'+m[1];
+    a.title=m[1]+' の詳細マニュアルを開く';
+    a.style.textDecoration='none';
+    el.parentNode.insertBefore(a,el);
+    a.appendChild(el);
+    el.style.cursor='pointer';
+    el.style.textDecoration='underline dotted';
+    el.style.textUnderlineOffset='3px';
+  });
+})();
+</script>
+</body>
+</html>

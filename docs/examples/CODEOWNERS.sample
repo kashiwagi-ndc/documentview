@@ -1,0 +1,23 @@
+# CODEOWNERS（モジュールの担当を決める例）
+# 置き場所：リポジトリの .github/CODEOWNERS（または ルート / docs/ 直下）
+# 役割：そのファイル/フォルダを変えるPRに、担当者が自動でレビュアーとして付く。
+#       「この領域は誰の担当か」が明確になり、別の人が知らずに重ねて作るのを防ぐ。
+# 注意：@ のあとは GitHub のユーザー名 or チーム名。担当者には write 権限が必要。
+
+# 既定（どこにも当てはまらない変更）の担当
+*                       @team-lead
+
+# フロントエンド
+/src/ui/                @frontend-dev1 @frontend-dev2
+
+# バックエンド・認証
+/src/auth/              @backend-dev1
+/src/api/               @backend-dev1 @backend-dev2
+
+# テストは担当を固定して二重作成を防ぐ
+/tests/                 @qa-dev
+
+# ドキュメント
+/docs/                  @team-lead
+
+# 注：複数人を書いても、PR承認は「いずれか1名」でOK。

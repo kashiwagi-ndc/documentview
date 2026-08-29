@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI駆動アジャイル開発 持ち物テンプレート（入力フォーム）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root{--c-primary:#0066FF;--c-accent:#FF6B35;--c-text:#1A1A1A;--c-sub:#666;--c-bg:#fff;--c-bg2:#F5F5F5;--c-border:#E0E0E0;--r:6px;--sb:240px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',sans-serif;color:var(--c-text);line-height:1.7;background:var(--c-bg);}
+h1,h2,h3{word-break:keep-all;}
+.sidebar{position:fixed;top:0;left:0;width:var(--sb);height:100vh;background:var(--c-text);color:#fff;padding:1.5rem 0;overflow-y:auto;z-index:100;}
+.sidebar__brand{padding:0 1.2rem 1rem;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:.6rem;}
+.sidebar__brand .material-icons{color:var(--c-accent);vertical-align:middle;}
+.sidebar__brand b{display:block;font-size:.95rem;margin-top:.3rem;}
+.sidebar__brand span{font-size:.7rem;color:#AAB;}
+.sidebar__back{display:flex;gap:.3rem;align-items:center;margin:.6rem 1.2rem;padding:.4rem .6rem;background:rgba(0,102,255,.18);color:#fff;text-decoration:none;border-radius:var(--r);font-size:.8rem;font-weight:700;}
+.sidebar__menu{list-style:none;}
+.sidebar__menu a{display:flex;gap:.5rem;align-items:center;padding:.55rem 1.2rem;color:#D5D9E0;text-decoration:none;font-size:.85rem;font-weight:700;border-left:3px solid transparent;cursor:pointer;}
+.sidebar__menu a:hover,.sidebar__menu a.active{background:rgba(0,102,255,.14);color:#fff;border-left-color:var(--c-accent);}
+.sidebar__foot{padding:1rem 1.2rem;font-size:.7rem;color:#B8BEC8;}
+.main{margin-left:var(--sb);padding:2rem;max-width:920px;}
+.tpl{display:none;}
+.tpl.active{display:block;}
+.tpl__head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.3rem;}
+.tpl__num{background:var(--c-primary);color:#fff;font-weight:900;width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;}
+.tpl.is-impl .tpl__num{background:var(--c-accent);}
+h2{font-size:1.4rem;font-weight:900;}
+.hint{color:var(--c-sub);font-size:.85rem;margin-bottom:1rem;}
+h3{font-size:1rem;margin:1.4rem 0 .5rem;display:flex;gap:.4rem;align-items:center;border-left:4px solid var(--c-primary);padding-left:.6rem;}
+label.f{display:block;margin:.6rem 0;}
+label.f .lbl{display:block;font-size:.82rem;font-weight:700;color:#333;margin-bottom:.2rem;}
+input[type=text],textarea,select{width:100%;border:1px solid var(--c-border);border-radius:var(--r);padding:.5rem .6rem;font-family:inherit;font-size:.9rem;}
+textarea{min-height:44px;resize:vertical;line-height:1.5;}
+td textarea{min-height:32px;}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 2px rgba(0,102,255,.12);}
+.chk{display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;font-size:.88rem;}
+.chk input{margin-top:.3rem;flex-shrink:0;}
+.radio-row{display:flex;gap:1.2rem;flex-wrap:wrap;margin:.4rem 0;}
+.radio-row label{display:flex;gap:.3rem;align-items:center;font-size:.9rem;font-weight:700;}
+table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.85rem;}
+th,td{border:1px solid var(--c-border);padding:.3rem .4rem;vertical-align:top;}
+th{background:var(--c-text);color:#fff;font-size:.8rem;font-weight:700;white-space:nowrap;}
+td input,td textarea,td select{border:none;padding:.3rem;}
+td input:focus,td textarea:focus{box-shadow:none;background:#EEF6FF;}
+.fixed{background:var(--c-bg2);font-weight:700;white-space:nowrap;}
+.actions{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--c-border);padding:1rem 0;margin-top:2rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+.btn{display:inline-flex;gap:.4rem;align-items:center;border:none;border-radius:var(--r);padding:.6rem 1.1rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;}
+.btn--primary{background:var(--c-accent);color:#fff;}
+.btn--ghost{background:#fff;border:2px solid var(--c-text);color:var(--c-text);}
+.btn:hover{opacity:.88;}
+.saved{font-size:.78rem;color:#22A06B;}
+.note{background:#FFF8F4;border-left:4px solid var(--c-accent);padding:.8rem 1rem;border-radius:0 var(--r) var(--r) 0;font-size:.85rem;margin:1rem 0;}
+code{background:#EEF2FF;color:var(--c-primary);padding:.05rem .35rem;border-radius:4px;font-size:.82rem;font-weight:700;}
+.menu-toggle{display:none;position:fixed;top:.7rem;left:.7rem;z-index:200;background:var(--c-text);color:#fff;border:none;border-radius:var(--r);width:44px;height:44px;cursor:pointer;}
+@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:.25s;}.sidebar.open{transform:translateX(0);}.main{margin-left:0;padding-top:3.5rem;}.menu-toggle{display:flex;align-items:center;justify-content:center;}}
+</style>
+</head>
+<body>
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')"><span class="material-icons">menu</span></button>
+<aside class="sidebar">
+  <div class="sidebar__brand"><span class="material-icons">edit_note</span><b>持ち物テンプレート</b><span>入力フォーム＋CSV出力</span></div>
+  <a class="sidebar__back" href="../ai-agile-manual_v1.html"><span class="material-icons">arrow_back</span>マニュアルに戻る</a>
+  <ul class="sidebar__menu">
+    <li><a data-tpl="t1" class="active">① 構想メモ</a></li>
+    <li><a data-tpl="t2">② 立上げメモ</a></li>
+    <li><a data-tpl="t3">③ 仕様メモ ★</a></li>
+    <li><a data-tpl="t3b">③ スプリントボード</a></li>
+    <li><a data-tpl="t6">⑥ レビュー結果</a></li>
+    <li><a data-tpl="t8">⑧ ふりかえり</a></li>
+    <li><a data-tpl="tm">メトリクス（4つの数字）</a></li>
+    <li><a data-tpl="tf">フィードバック</a></li>
+  </ul>
+  <div class="sidebar__foot">入力は自動保存（このブラウザ内）。CSVに出して Claude Code に読み込ませます。</div>
+</aside>
+
+<main class="main">
+
+<!-- ① 構想メモ -->
+<section class="tpl active" id="t1">
+  <div class="tpl__head"><span class="tpl__num">1</span><h2>構想メモ</h2></div>
+  <p class="hint">工程①。キックオフ前に埋めて持ち込み、判断結果を②へ引き継ぐ。</p>
+  <h3>案件の基本</h3>
+  <label class="f"><span class="lbl">案件名</span><textarea data-label="案件名"></textarea></label>
+  <label class="f"><span class="lbl">目的（何を・なぜ・誰のために）</span><textarea data-label="目的"></textarea></label>
+  <label class="f"><span class="lbl">生む価値（アウトカム／KPI）※作る量でなく成果</span><textarea data-label="価値KPI"></textarea></label>
+  <label class="f"><span class="lbl">関係者</span><textarea data-label="関係者"></textarea></label>
+  <label class="f"><span class="lbl">予算・期日（あれば）</span><textarea data-label="予算期日"></textarea></label>
+  <h3>適合性チェック</h3>
+  <div class="chk"><input type="checkbox" data-label="適合_目的明確"><span>目的が明確（「いい感じに」「DX」等の曖昧語でない）</span></div>
+  <div class="chk"><input type="checkbox" data-label="適合_関係者合意"><span>関係者が「要件は育てる／優先順位は変わりうる」を理解・合意</span></div>
+  <div class="chk"><input type="checkbox" data-label="適合_対象適合"><span>対象が適合（不確実性が高い・段階的に価値／完全固定・短期一括でない）</span></div>
+  <div class="chk"><input type="checkbox" data-label="適合_体制"><span>意思決定者が1人に定まっている</span></div>
+  <h3>AIを使う範囲とリスク</h3>
+  <label class="f"><span class="lbl">AIを使う範囲</span><textarea data-label="AI範囲"></textarea></label>
+  <label class="f"><span class="lbl">線引き（AIに渡さないもの）</span><textarea data-label="AI線引き"></textarea></label>
+  <h3>判断</h3>
+  <div class="radio-row">
+    <label><input type="radio" name="t1-judge" data-label="判断" value="進む">進む</label>
+    <label><input type="radio" name="t1-judge" data-label="判断" value="止まる">止まる</label>
+    <label><input type="radio" name="t1-judge" data-label="判断" value="やり方を変える">やり方を変える</label>
+  </div>
+  <label class="f"><span class="lbl">理由（根拠つき）</span><textarea data-label="判断理由"></textarea></label>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t1','構想メモ')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t1')">この入力をクリア</button>
+    <span class="saved" id="saved-t1"></span>
+  </div>
+</section>
+
+<!-- ② 立上げメモ -->
+<section class="tpl" id="t2">
+  <div class="tpl__head"><span class="tpl__num">2</span><h2>立上げメモ</h2></div>
+  <p class="hint">工程②。①を受けて埋める。CLAUDE.md・やることリストは③以降が読み込む。</p>
+  <h3>体制</h3>
+  <table>
+    <tr><th>役割</th><th>担当</th></tr>
+    <tr><td class="fixed">製品責任者（PO）<br><small>外部委託=ユーザ企業／内製=社内事業部門</small></td><td><textarea data-label="体制_PO"></textarea></td></tr>
+    <tr><td class="fixed">進行支援役（SM）<br><small>外部委託=ベンダ／内製=社内SM</small></td><td><textarea data-label="体制_SM"></textarea></td></tr>
+    <tr><td class="fixed">開発チーム<br><small>最大10名程度</small></td><td><textarea data-label="体制_開発"></textarea></td></tr>
+  </table>
+  <h3>メンバー一覧（③のタスク割り当ての材料）</h3>
+  <table>
+    <tr><th>名前</th><th>役割</th><th>得意分野</th><th>稼働量の目安</th></tr>
+    <tr><td><textarea data-label="メンバー1_名前"></textarea></td><td><textarea data-label="メンバー1_役割"></textarea></td><td><textarea data-label="メンバー1_得意"></textarea></td><td><textarea data-label="メンバー1_稼働"></textarea></td></tr>
+    <tr><td><textarea data-label="メンバー2_名前"></textarea></td><td><textarea data-label="メンバー2_役割"></textarea></td><td><textarea data-label="メンバー2_得意"></textarea></td><td><textarea data-label="メンバー2_稼働"></textarea></td></tr>
+    <tr><td><textarea data-label="メンバー3_名前"></textarea></td><td><textarea data-label="メンバー3_役割"></textarea></td><td><textarea data-label="メンバー3_得意"></textarea></td><td><textarea data-label="メンバー3_稼働"></textarea></td></tr>
+    <tr><td class="fixed">AIエージェント</td><td class="fixed">補助</td><td><textarea data-label="メンバーAI_得意">定型実装・調査・テスト雛形</textarea></td><td class="fixed">並列で複数同時</td></tr>
+  </table>
+  <h3>製品の目標</h3>
+  <label class="f"><span class="lbl">一文で（全員が同じ言葉で言える）</span><textarea data-label="製品の目標"></textarea></label>
+  <label class="f"><span class="lbl">①のKPIとの整合</span><textarea data-label="KPI整合"></textarea></label>
+  <h3>機能要望リスト（初版）</h3>
+  <table>
+    <tr><th>優先</th><th>項目</th><th>価値・リスクでの理由</th><th>受入基準</th></tr>
+    <tr><td class="fixed">高</td><td><textarea data-label="要望1_項目"></textarea></td><td><textarea data-label="要望1_理由"></textarea></td><td><textarea data-label="要望1_受入"></textarea></td></tr>
+    <tr><td class="fixed">中</td><td><textarea data-label="要望2_項目"></textarea></td><td><textarea data-label="要望2_理由"></textarea></td><td><textarea data-label="要望2_受入"></textarea></td></tr>
+    <tr><td class="fixed">低</td><td><textarea data-label="要望3_項目"></textarea></td><td><textarea data-label="要望3_理由"></textarea></td><td><textarea data-label="要望3_受入"></textarea></td></tr>
+  </table>
+  <h3>CLAUDE.md に書く項目</h3>
+  <label class="f"><span class="lbl">build/test コマンド</span><textarea data-label="CLAUDE_コマンド"></textarea></label>
+  <label class="f"><span class="lbl">コーディング規約・ブランチ運用</span><textarea data-label="CLAUDE_規約"></textarea></label>
+  <label class="f"><span class="lbl">技術スタック（決まっていれば。未定なら④で確定）</span><textarea data-label="技術スタック"></textarea></label>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t2','立上げメモ')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t2')">この入力をクリア</button>
+    <span class="saved" id="saved-t2"></span>
+  </div>
+</section>
+
+<!-- ③ 仕様メモ -->
+<section class="tpl" id="t3">
+  <div class="tpl__head"><span class="tpl__num">3</span><h2>仕様メモ ★最重要</h2></div>
+  <p class="hint">工程③。④製造・⑤テストが共通の材料として読み込む。具体的に書くほど出力がブレない。</p>
+  <h3>今回やること</h3>
+  <label class="f"><span class="lbl">機能名</span><textarea data-label="機能名" id="t3-name"></textarea></label>
+  <label class="f"><span class="lbl">今回の目標（スプリントゴール／1〜2文）</span><textarea data-label="今回の目標"></textarea></label>
+  <label class="f"><span class="lbl">①のKPIへの寄与</span><textarea data-label="KPI寄与"></textarea></label>
+  <h3>仕様（AIが迷わないように）</h3>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td class="fixed">対象ファイル</td><td><textarea data-label="対象ファイル"></textarea></td></tr>
+    <tr><td class="fixed">対象の関数・IF</td><td><textarea data-label="対象関数"></textarea></td></tr>
+    <tr><td class="fixed">対象外（やらないこと）</td><td><textarea data-label="対象外"></textarea></td></tr>
+    <tr><td class="fixed">動作確認手順（できたの基準）</td><td><textarea data-label="動作確認手順"></textarea></td></tr>
+  </table>
+  <h3>不確実性（まだ確定していないこと）</h3>
+  <table>
+    <tr><th>種類</th><th>内容</th><th>いつ・どう確かめる</th></tr>
+    <tr><td class="fixed">曖昧性</td><td><textarea data-label="不確実_曖昧_内容"></textarea></td><td><textarea data-label="不確実_曖昧_確認"></textarea></td></tr>
+    <tr><td class="fixed">変動性</td><td><textarea data-label="不確実_変動_内容"></textarea></td><td><textarea data-label="不確実_変動_確認"></textarea></td></tr>
+    <tr><td class="fixed">複雑性</td><td><textarea data-label="不確実_複雑_内容"></textarea></td><td><textarea data-label="不確実_複雑_確認"></textarea></td></tr>
+    <tr><td class="fixed">リスク（脅威/機会）</td><td><textarea data-label="不確実_リスク_内容"></textarea></td><td><textarea data-label="不確実_リスク_確認"></textarea></td></tr>
+  </table>
+  <h3>完成条件（DoD）</h3>
+  <div class="chk"><input type="checkbox" data-label="DoD_機能テスト緑"><span>機能テストが緑</span></div>
+  <div class="chk"><input type="checkbox" data-label="DoD_脆弱性検査"><span>脆弱性検査を通過</span></div>
+  <label class="f"><span class="lbl">重要な品質特性（例：セキュリティ・使用性）</span><textarea data-label="DoD_品質特性"></textarea></label>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t3','仕様メモ','t3-name')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t3')">この入力をクリア</button>
+    <span class="saved" id="saved-t3"></span>
+  </div>
+</section>
+
+<!-- ③ スプリントボード -->
+<section class="tpl" id="t3b">
+  <div class="tpl__head"><span class="tpl__num">3</span><h2>スプリントボード（タスク割り当て）</h2></div>
+  <p class="hint">工程③。今回やることをタスクに割り、担当（人/AI）・見積り・状態を入れる。AI担当行はCSVを Claude Code に渡せば④で並列実行できる。割り当てはAIが案を出しチームが調整して確定。</p>
+  <label class="f"><span class="lbl">今回の目標（スプリントゴール）</span><textarea data-label="ボード_目標" id="t3b-name"></textarea></label>
+  <label class="f"><span class="lbl">期間（例：2週間〜MM/DD）</span><textarea data-label="ボード_期間"></textarea></label>
+  <h3>タスク一覧</h3>
+  <table>
+    <tr><th>ID</th><th>タスク内容</th><th>担当</th><th>種別</th><th>見積り</th><th>状態</th><th>関連仕様メモ</th></tr>
+    <tr><td class="fixed">T1</td><td><textarea data-label="T1_内容"></textarea></td><td><textarea data-label="T1_担当"></textarea></td><td><select data-label="T1_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T1_見積"></textarea></td><td><select data-label="T1_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T1_仕様メモ"></textarea></td></tr>
+    <tr><td class="fixed">T2</td><td><textarea data-label="T2_内容"></textarea></td><td><textarea data-label="T2_担当"></textarea></td><td><select data-label="T2_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T2_見積"></textarea></td><td><select data-label="T2_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T2_仕様メモ"></textarea></td></tr>
+    <tr><td class="fixed">T3</td><td><textarea data-label="T3_内容"></textarea></td><td><textarea data-label="T3_担当"></textarea></td><td><select data-label="T3_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T3_見積"></textarea></td><td><select data-label="T3_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T3_仕様メモ"></textarea></td></tr>
+    <tr><td class="fixed">T4</td><td><textarea data-label="T4_内容"></textarea></td><td><textarea data-label="T4_担当"></textarea></td><td><select data-label="T4_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T4_見積"></textarea></td><td><select data-label="T4_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T4_仕様メモ"></textarea></td></tr>
+    <tr><td class="fixed">T5</td><td><textarea data-label="T5_内容"></textarea></td><td><textarea data-label="T5_担当"></textarea></td><td><select data-label="T5_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T5_見積"></textarea></td><td><select data-label="T5_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T5_仕様メモ"></textarea></td></tr>
+    <tr><td class="fixed">T6</td><td><textarea data-label="T6_内容"></textarea></td><td><textarea data-label="T6_担当"></textarea></td><td><select data-label="T6_種別"><option value=""></option><option>人</option><option>AI</option></select></td><td><textarea data-label="T6_見積"></textarea></td><td><select data-label="T6_状態"><option value=""></option><option>未着手</option><option>進行中</option><option>レビュー中</option><option>完了</option></select></td><td><textarea data-label="T6_仕様メモ"></textarea></td></tr>
+  </table>
+  <h3>バランス確認</h3>
+  <div class="chk"><input type="checkbox" data-label="バランス_偏りなし"><span>特定の人にタスクが偏っていない</span></div>
+  <div class="chk"><input type="checkbox" data-label="バランス_担当見積"><span>各タスクに担当・見積りが付いている</span></div>
+  <div class="chk"><input type="checkbox" data-label="バランス_線引き"><span>AI/人の線引きが妥当（判断・設計・レビューは人）</span></div>
+  <div class="note" style="font-size:.82rem"><b>AI担当タスクの渡し方：</b>「CSVに出力」して <code>docs/03_計画・設計/スプリントボード.csv</code> 等に保存 → Claude Code に「このCSVの<b>種別=AIの行</b>を、工程④で並列に実装して。各タスクの関連仕様メモも読み込んで」と渡す。</div>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t3b','スプリントボード','t3b-name')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t3b')">この入力をクリア</button>
+    <span class="saved" id="saved-t3b"></span>
+  </div>
+</section>
+
+<!-- ⑥ レビュー結果 -->
+<section class="tpl" id="t6">
+  <div class="tpl__head"><span class="tpl__num">6</span><h2>レビュー結果</h2></div>
+  <p class="hint">工程⑥。④の差分・③仕様・DoDを持ち込み、5観点で確認。合否を⑦/⑧へ。</p>
+  <label class="f"><span class="lbl">機能名／PR</span><textarea data-label="機能名PR" id="t6-name"></textarea></label>
+  <label class="f"><span class="lbl">仕様メモのパス</span><textarea data-label="仕様メモパス"></textarea></label>
+  <h3>5観点レビュー</h3>
+  <table>
+    <tr><th>観点</th><th>指摘</th><th>重大度</th><th>対応</th></tr>
+    <tr><td class="fixed">正確性</td><td><textarea data-label="観点_正確性_指摘"></textarea></td><td><select data-label="観点_正確性_重大度"><option value=""></option><option>致命</option><option>要改善</option><option>軽微</option></select></td><td><textarea data-label="観点_正確性_対応"></textarea></td></tr>
+    <tr><td class="fixed">想定外ケース</td><td><textarea data-label="観点_想定外_指摘"></textarea></td><td><select data-label="観点_想定外_重大度"><option value=""></option><option>致命</option><option>要改善</option><option>軽微</option></select></td><td><textarea data-label="観点_想定外_対応"></textarea></td></tr>
+    <tr><td class="fixed">脆弱性</td><td><textarea data-label="観点_脆弱性_指摘"></textarea></td><td><select data-label="観点_脆弱性_重大度"><option value=""></option><option>致命</option><option>要改善</option><option>軽微</option></select></td><td><textarea data-label="観点_脆弱性_対応"></textarea></td></tr>
+    <tr><td class="fixed">性能</td><td><textarea data-label="観点_性能_指摘"></textarea></td><td><select data-label="観点_性能_重大度"><option value=""></option><option>致命</option><option>要改善</option><option>軽微</option></select></td><td><textarea data-label="観点_性能_対応"></textarea></td></tr>
+    <tr><td class="fixed">既存との整合</td><td><textarea data-label="観点_整合_指摘"></textarea></td><td><select data-label="観点_整合_重大度"><option value=""></option><option>致命</option><option>要改善</option><option>軽微</option></select></td><td><textarea data-label="観点_整合_対応"></textarea></td></tr>
+  </table>
+  <h3>ゲート確認</h3>
+  <div class="chk"><input type="checkbox" data-label="ゲート_脆弱性検査"><span>脆弱性検査（SAST/SCA）通過</span></div>
+  <div class="chk"><input type="checkbox" data-label="ゲート_テスト緑"><span>文法／型／テストが緑（検証ゲートで強制）</span></div>
+  <div class="chk"><input type="checkbox" data-label="ゲート_AIセーフティ"><span>AIプロダクトはAIセーフティ評価10観点を確認</span></div>
+  <h3>成果デモ会</h3>
+  <label class="f"><span class="lbl">見せた相手（関係者）</span><textarea data-label="お披露目_相手"></textarea></label>
+  <label class="f"><span class="lbl">価値・KPIへの寄与の確認</span><textarea data-label="お披露目_KPI"></textarea></label>
+  <label class="f"><span class="lbl">次にやること</span><textarea data-label="お披露目_次"></textarea></label>
+  <h3>合否</h3>
+  <div class="radio-row">
+    <label><input type="radio" name="t6-result" data-label="合否" value="合格">合格（⑦リリースへ）</label>
+    <label><input type="radio" name="t6-result" data-label="合否" value="差し戻し">差し戻し</label>
+  </div>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t6','レビュー結果','t6-name')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t6')">この入力をクリア</button>
+    <span class="saved" id="saved-t6"></span>
+  </div>
+</section>
+
+<!-- ⑧ ふりかえり -->
+<section class="tpl" id="t8">
+  <div class="tpl__head"><span class="tpl__num">8</span><h2>ふりかえりメモ</h2></div>
+  <p class="hint">工程⑧。改善は③次サイクルの計画に反映する。</p>
+  <h3>今サイクルの事実</h3>
+  <label class="f"><span class="lbl">うまくいった（具体的な出来事で）</span><textarea data-label="事実_良かった"></textarea></label>
+  <label class="f"><span class="lbl">うまくいかなかった（事故った）</span><textarea data-label="事実_悪かった"></textarea></label>
+  <h3>AI活用のふりかえり</h3>
+  <label class="f"><span class="lbl">効いた</span><textarea data-label="AI_効いた"></textarea></label>
+  <label class="f"><span class="lbl">事故った</span><textarea data-label="AI_事故った"></textarea></label>
+  <h3>DORA「7つの能力」点検</h3>
+  <div class="chk"><input type="checkbox" data-label="DORA_AI方針"><span>① 明確なAI方針</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_データ基盤"><span>② 健全なデータ基盤</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_社内データ"><span>③ AIがアクセスできる社内データ</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_バージョン管理"><span>④ 強いバージョン管理</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_小さく作る"><span>⑤ 小さく作る</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_ユーザー中心"><span>⑥ ユーザー中心</span></div>
+  <div class="chk"><input type="checkbox" data-label="DORA_社内基盤"><span>⑦ 質の高い社内基盤</span></div>
+  <h3>価値・KPIの測定</h3>
+  <label class="f"><span class="lbl">目標KPI</span><textarea data-label="KPI_目標"></textarea></label>
+  <label class="f"><span class="lbl">現在値 → 差分</span><textarea data-label="KPI_現在値"></textarea></label>
+  <label class="f"><span class="lbl">出ていない場合の原因</span><textarea data-label="KPI_原因"></textarea></label>
+  <h3>次サイクルの改善（1〜3個）</h3>
+  <table>
+    <tr><th>改善</th><th>誰が</th><th>いつまでに</th><th>どうなれば達成</th></tr>
+    <tr><td><textarea data-label="改善1_内容"></textarea></td><td><textarea data-label="改善1_誰"></textarea></td><td><textarea data-label="改善1_期限"></textarea></td><td><textarea data-label="改善1_達成"></textarea></td></tr>
+    <tr><td><textarea data-label="改善2_内容"></textarea></td><td><textarea data-label="改善2_誰"></textarea></td><td><textarea data-label="改善2_期限"></textarea></td><td><textarea data-label="改善2_達成"></textarea></td></tr>
+    <tr><td><textarea data-label="改善3_内容"></textarea></td><td><textarea data-label="改善3_誰"></textarea></td><td><textarea data-label="改善3_期限"></textarea></td><td><textarea data-label="改善3_達成"></textarea></td></tr>
+  </table>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('t8','ふりかえり')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('t8')">この入力をクリア</button>
+    <span class="saved" id="saved-t8"></span>
+  </div>
+</section>
+
+<!-- メトリクス -->
+<section class="tpl" id="tm">
+  <div class="tpl__head"><span class="tpl__num">📊</span><h2>メトリクス（チームの調子を測る4つの数字）</h2></div>
+  <p class="hint">ふりかえり（⑧）で使う。完璧に測らなくてOK。<b>傾向（良くなっている／悪くなっている）</b>が分かれば十分。</p>
+  <label class="f"><span class="lbl">計測日</span><textarea data-label="計測日" id="tm-name"></textarea></label>
+  <h3>4つの数字</h3>
+  <table>
+    <tr><th>やさしい言い方</th><th>値</th><th>良い方向</th></tr>
+    <tr><td class="fixed">リリースの頻度<br><small>どれくらいの間隔でリリース</small></td><td><textarea data-label="リリースの頻度"></textarea></td><td class="fixed">短い間隔ほど良い</td></tr>
+    <tr><td class="fixed">変更が届くまでの時間<br><small>書いてから本番までの時間</small></td><td><textarea data-label="変更が届くまでの時間"></textarea></td><td class="fixed">短いほど良い</td></tr>
+    <tr><td class="fixed">リリースで壊れる割合<br><small>障害・手戻りになった割合</small></td><td><textarea data-label="リリースで壊れる割合"></textarea></td><td class="fixed">低いほど良い</td></tr>
+    <tr><td class="fixed">直るまでの時間<br><small>壊れてから戻るまで</small></td><td><textarea data-label="直るまでの時間"></textarea></td><td class="fixed">短いほど良い</td></tr>
+  </table>
+  <label class="f"><span class="lbl">ひとこと（気づき）</span><textarea data-label="気づき"></textarea></label>
+  <div class="note" style="font-size:.82rem">数字そのものより<b>"動き"</b>を見る。先月より良くなっていれば◎。悪化したら⑧の改善に入れる。</div>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('tm','メトリクス','tm-name')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('tm')">この入力をクリア</button>
+    <span class="saved" id="saved-tm"></span>
+  </div>
+</section>
+
+<!-- フィードバック -->
+<section class="tpl" id="tf">
+  <div class="tpl__head"><span class="tpl__num"><span class="material-icons">campaign</span></span><h2>フィードバック（キット改善用）</h2></div>
+  <p class="hint">スキル/ドキュメントを使って感じたことを送ってください。<b>匿名OK・重要度だけ必須。</b>「良かった」も歓迎（削っちゃダメな所が分かります）。</p>
+  <label class="f"><span class="lbl">対象（どのスキル/ドキュメント）</span><textarea data-label="対象" id="tf-name"></textarea></label>
+  <label class="f"><span class="lbl">種類</span><select data-label="種類"><option value=""></option><option>使いにくい</option><option>わからない</option><option>バグ</option><option>要望</option><option>良かった</option></select></label>
+  <label class="f"><span class="lbl">重要度（必須）</span><select data-label="重要度"><option value=""></option><option>高（止まる）</option><option>中（不便）</option><option>低（あれば嬉しい・感想）</option></select></label>
+  <label class="f"><span class="lbl">内容（何が起きたか・どの場面で）</span><textarea data-label="内容"></textarea></label>
+  <label class="f"><span class="lbl">どうなら良い（任意）</span><textarea data-label="どうなら良い"></textarea></label>
+  <label class="f"><span class="lbl">報告者（任意・匿名OK）</span><textarea data-label="報告者"></textarea></label>
+  <div class="note" style="font-size:.82rem">「CSVに出力」して担当に渡すか、Claude Code に「このフィードバックを <code>docs/feedback/feedback-log.md</code> に追記して」と渡せば、正本のログにたまります。進行役 <code>/agile-coach</code> に「フィードバック」と言えば、その場で聞き取って追記もできます。</div>
+  <div class="actions">
+    <button class="btn btn--primary" onclick="exportCSV('tf','フィードバック','tf-name')"><span class="material-icons">download</span>CSVに出力</button>
+    <button class="btn btn--ghost" onclick="clearSec('tf')">この入力をクリア</button>
+    <span class="saved" id="saved-tf"></span>
+  </div>
+</section>
+
+<div class="note">
+  <b>Claude Code での使い方：</b>「CSVに出力」で保存したCSV（例 <code>仕様メモ_ログイン機能.csv</code>）を、プロジェクトの <code>docs/03_計画・設計/</code> 等に置き、Claude Code に
+  「<code>docs/03_計画・設計/仕様メモ_ログイン機能.csv</code> を読み込んで、工程④の実装をして」のように渡します。
+  CSVは「項目,内容」の2列・UTF-8（BOM付き＝Excelでも文字化けしない）。先頭に <code>テンプレ,&lt;名前&gt;</code> の行が入ります。
+  <div style="margin-top:.7rem">
+    <button class="btn btn--ghost" onclick="triggerImport()"><span class="material-icons">upload_file</span>保存したCSVを読み込んで復元（表示中のタブに反映）</button>
+    <input type="file" id="csv-import" accept=".csv,text/csv" style="display:none">
+  </div>
+</div>
+
+</main>
+
+<script>
+// タブ切替
+const menu=document.querySelectorAll('.sidebar__menu a');
+menu.forEach(a=>a.addEventListener('click',()=>{
+  const id=a.dataset.tpl;
+  menu.forEach(x=>x.classList.toggle('active',x===a));
+  document.querySelectorAll('.tpl').forEach(s=>s.classList.toggle('active',s.id===id));
+  if(window.innerWidth<=900) document.querySelector('.sidebar').classList.remove('open');
+  window.scrollTo(0,0);
+}));
+
+// 自動保存（このブラウザ内・localStorage）。キーは「セクション|data-label（ラジオはname）」＝並び順に依存しない
+const KEY='ai-agile-template-form-v2';
+const fields=document.querySelectorAll('.tpl input,.tpl textarea,.tpl select'); // フォーム欄のみ（CSV読込のファイル入力を除外）
+function keyOf(el){
+  const sec=el.closest('.tpl'); const sid=sec?sec.id:'_';
+  if(el.type==='radio') return sid+'|radio|'+el.name;
+  return sid+'|'+el.getAttribute('data-label');
+}
+function saveAll(){
+  const d={};
+  fields.forEach(el=>{
+    const k=keyOf(el);
+    if(el.type==='checkbox') d[k]=el.checked;
+    else if(el.type==='radio'){ if(el.checked) d[k]=el.value; }
+    else d[k]=el.value;
+  });
+  try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}
+  document.querySelectorAll('.saved').forEach(s=>s.textContent='自動保存しました ✓');
+  setTimeout(()=>document.querySelectorAll('.saved').forEach(s=>s.textContent=''),1500);
+}
+function loadAll(){
+  let raw; try{raw=localStorage.getItem(KEY);}catch(e){}
+  if(!raw) return;
+  const d=JSON.parse(raw);
+  fields.forEach(el=>{
+    const k=keyOf(el);
+    if(el.type==='checkbox'){ if(k in d) el.checked=d[k]; }
+    else if(el.type==='radio'){ if(d[k]===el.value) el.checked=true; }
+    else { if(k in d) el.value=d[k]; }
+  });
+}
+fields.forEach(el=>{
+  // アクセシビリティ：ラベル未設定の欄に data-label を読み上げ名として付与（表のセル入力など）
+  if(!el.getAttribute('aria-label') && el.getAttribute('data-label')) el.setAttribute('aria-label', el.getAttribute('data-label'));
+  el.addEventListener('input',saveAll); el.addEventListener('change',saveAll);
+});
+loadAll();
+
+// 出力前にチェックする「重要項目」（未入力なら確認）
+const REQUIRED={ t1:['目的','価値KPI'], t2:['製品の目標'], t3:['今回の目標','対象ファイル','動作確認手順'], t6:['機能名PR'], t8:[], tf:['重要度'] };
+
+// CSV出力
+function exportCSV(secId, baseName, nameFieldId){
+  const sec=document.getElementById(secId);
+  const req=REQUIRED[secId]||[];
+  const empties=req.filter(lb=>{ const el=sec.querySelector('[data-label="'+lb+'"]'); return el && !String(el.value||'').trim(); });
+  if(empties.length && !confirm('未入力の重要項目があります（'+empties.join('、')+'）。このまま出力しますか？')) return;
+
+  const rows=[['項目','内容'],['テンプレ',baseName]];
+  const radios={};
+  sec.querySelectorAll('[data-label]').forEach(el=>{
+    const label=el.getAttribute('data-label');
+    if(el.type==='radio'){ if(!(label in radios)) radios[label]=''; if(el.checked) radios[label]=el.value; return; }
+    let v=''; if(el.type==='checkbox') v=el.checked?'✓':''; else v=el.value||'';
+    rows.push([label,v]);
+  });
+  Object.keys(radios).forEach(k=>rows.push([k,radios[k]]));
+  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  let fname=baseName;
+  if(nameFieldId){ const n=document.getElementById(nameFieldId); if(n&&n.value.trim()) fname=baseName+'_'+n.value.trim(); }
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=fname+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function clearSec(secId){
+  if(!confirm('この入力をクリアしますか？')) return;
+  const sec=document.getElementById(secId);
+  sec.querySelectorAll('input,textarea,select').forEach(el=>{ if(el.type==='checkbox'||el.type==='radio')el.checked=false; else el.value=''; });
+  saveAll();
+}
+
+// CSV読込（再編集）：表示中のタブに反映
+function activeSec(){ const s=document.querySelector('.tpl.active'); return s?s.id:null; }
+function triggerImport(){ const inp=document.getElementById('csv-import'); inp.dataset.sec=activeSec()||''; inp.value=''; inp.click(); }
+function parseCSV(text){
+  text=text.replace(/^﻿/,''); const rows=[]; let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+    else { if(c==='"') q=true; else if(c===','){ row.push(cur); cur=''; }
+      else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
+      else if(c==='\r'){} else cur+=c; }
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+function fillSection(secId, map){
+  const sec=document.getElementById(secId); if(!sec) return;
+  sec.querySelectorAll('[data-label]').forEach(el=>{
+    const label=el.getAttribute('data-label'); if(!(label in map)) return;
+    const v=map[label];
+    if(el.type==='checkbox') el.checked=(v==='✓'||v==='true'||v==='はい');
+    else if(el.type==='radio') el.checked=(el.value===v);
+    else el.value=v;
+  });
+  saveAll();
+}
+document.getElementById('csv-import').addEventListener('change',function(e){
+  const f=e.target.files[0]; const sec=e.target.dataset.sec; if(!f||!sec) return;
+  const r=new FileReader();
+  r.onload=function(){
+    const rows=parseCSV(r.result); const map={};
+    rows.forEach(rw=>{ if(rw.length>=2 && rw[0]!=='項目' && rw[0]!=='テンプレ') map[rw[0]]=rw[1]; });
+    fillSection(sec,map); alert('CSVを読み込みました（表示中のタブに反映）');
+  };
+  r.readAsText(f);
+});
+</script>
+</body>
+</html>

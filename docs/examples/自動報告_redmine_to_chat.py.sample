@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+自動報告：Redmine を読んで「表・図解中心」のレポートを作り、送信するサンプル。
+置き場所: scripts/auto_report_redmine.py（GitHub Actions から呼ぶ）
+
+設計のキモ:
+  - 読み取り元 = Redmine REST API（GitHubでなくてもOK。ここがGitHub非依存の要）
+  - ★Redmineは「worked example」。ツール非依存＝Jira/Backlog/GitHub Issues等なら
+    読み取り/書き戻しの数行を差し替えるだけ（対応表＝references/reporting.md「読み取り元アダプタ」）。
+  - 出力       = 「フル版HTML（表＋文字バー図解）」を作る
+                 → メール/Wikiはそのまま、Teams/Slackは要点ダイジェスト＋リンク
+  - 図解は Unicode ブロックの文字バーで表現（画像ホスティング不要）
+  - 文章は補足（1〜3行）。主役は表とバー。
+  - 主な読み手＝開発チーム社内。中身は動き・詰まり・重複/衝突中心（様式＝docs/templates/自動報告_レポート様式.md）。
+  - 用語はやさしい日本語を主に、アジャイル語は括弧で初出だけ（例：反復(スプリント)・残り作業の減り具合(バーンダウン)）。
+
+環境変数: REDMINE_URL / REDMINE_API_KEY / REDMINE_PROJECT / TEAMS_WEBHOOK_URL
+          REPORT_TYPE(daily|weekly|monthly) / DRY_RUN(true|false)
+
+※ プロジェクト固有値（スプリント=どのバージョンか、ポイント=どのカスタムフィールドか）は
+   TODO 箇所を自分の Redmine に合わせて埋める。
+"""
+import os, sys, datetime, requests
+
+URL   = os.environ["REDMINE_URL"].rstrip("/")
+KEY   = os.environ["REDMINE_API_KEY"]
+PROJ  = os.environ["REDMINE_PROJECT"]
+MODE  = os.environ.get("MODE", "meetings")   # meetings(定例駆動) / daily / weekly / monthly
+DRY   = os.environ.get("DRY_RUN", "false").lower() == "true"
+MEETING_TRACKER = "定例"        # TODO: 定例チケットのトラッカー名（IDでもよい）に合わせる
+SHUBETSU_FIELD  = "種別"        # TODO: 様式を出し分けるカスタムフィールド名
+# 定例の「種別」→ どのレポート様式を出すか
+SHUBETSU_TO_TYPE = {"朝会":"daily","週次":"weekly","月次":"monthly",
+                    "レビュー":"review","レトロ":"retro"}
+H     = {"X-Redmine-API-Key": KEY, "Content-Type": "application/json"}
+
+# 規模(カスタムフィールド)→ポイント。キットの相対見積り 小1/中3/大5 に合わせる。
+POINTS = {"小": 1, "中": 3, "大": 5}
+SIZE_FIELD_NAME = "規模"   # TODO: 実際のカスタムフィールド名に合わせる
+
+def rm_get(path, **params):
+    params["key"] = KEY  # ヘッダでもクエリでも可
+    r = requests.get(f"{URL}{path}", headers=H, params=params, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+def bar(ratio, width=10):
+    """0..1 を ████░░ の文字バーにする（図解＝画像不要）"""
+    n = max(0, min(width, round(ratio * width)))
+    return "█" * n + "░" * (width - n) + f" {round(ratio*100)}%"
+
+def issues(**filters):
+    out, offset = [], 0
+    while True:
+        data = rm_get("/issues.json", project_id=PROJ, status_id="*",
+                      limit=100, offset=offset, **filters)
+        out += data["issues"]
+        offset += 100
+        if offset >= data["total_count"]:
+            break
+    return out
+
+def cf(issue, name):
+    for c in issue.get("custom_fields", []):
+        if c.get("name") == name:
+            return c.get("value")
+    return None
+
+# ---- データ取得（種別ごとに必要な分だけ） ----------------------------------
+all_open = issues()  # 全課題（状態別カウント・担当別に使う）
+def count_by_status(label_open, label_closed=None):
+    return sum(1 for i in all_open if i["status"]["name"] == label_open)
+
+board = {
+    "未着手":   sum(1 for i in all_open if i["status"]["name"] in ("新規", "未着手")),
+    "進行中":   sum(1 for i in all_open if i["status"]["name"] == "進行中"),
+    "レビュー中": sum(1 for i in all_open if i["status"]["name"] in ("レビュー中", "解決")),
+    "完了":     sum(1 for i in all_open if i["status"]["name"] in ("終了", "完了")),
+}
+maxc = max(board.values()) or 1
+
+# ---- レポート本文（HTML：表＋文字バー） ------------------------------------
+def html_table(headers, rows):
+    th = "".join(f"<th>{h}</th>" for h in headers)
+    trs = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
+    return f'<table border="1" cellpadding="6" style="border-collapse:collapse">' \
+           f"<tr>{th}</tr>{trs}</table>"
+
+today = datetime.date.today().isoformat()  # ※Actions上はUTC。表示用にJST補正してもよい
+
+def build_daily():
+    rows = [[k, v, f"<code>{bar(v/maxc)}</code>"] for k, v in board.items()]
+    t_board = html_table(["状態", "件数", "図解"], rows)
+    # メンバー別（担当 × 状態）。今日やる/ブロッカーはRedmineの運用に合わせて拡張。
+    by_user = {}
+    for i in all_open:
+        u = (i.get("assigned_to") or {}).get("name", "未割当")
+        by_user.setdefault(u, []).append(i)
+    urows = [[u, len(v), ", ".join(f'#{x["id"]}' for x in v[:5])] for u, v in by_user.items()]
+    t_user = html_table(["担当", "担当件数", "課題(#)"], urows)
+    return f"<h2>📅 朝会メモ（デイリー） {today}</h2>{t_board}<h3>メンバー別（今日やる/触る所/詰まり）</h3>{t_user}" \
+           f"<p>補足：同じ所を2人が触らないか・詰まり（ブロッカー）を朝会で確認。</p>"
+
+def build_weekly():
+    # スプリント=対象バージョン。TODO: 現行スプリントのversion_idを指定/自動判定。
+    closed = [i for i in all_open if i["status"]["name"] in ("終了", "完了")]
+    done_pt = sum(POINTS.get(cf(i, SIZE_FIELD_NAME), 0) for i in closed)
+    plan_pt = sum(POINTS.get(cf(i, SIZE_FIELD_NAME), 0) for i in all_open)
+    ratio = done_pt / plan_pt if plan_pt else 0
+    t_sum = html_table(["指標", "値", "図解"], [
+        ["計画ポイント", f"{plan_pt}pt", ""],
+        ["完了ポイント", f"{done_pt}pt", f"<code>{bar(ratio)}</code>"],
+        ["残ポイント", f"{plan_pt-done_pt}pt", ""],
+    ])
+    drows = [[f'#{i["id"]}', i["subject"], (i.get("assigned_to") or {}).get("name","")]
+             for i in closed[:15]]
+    t_done = html_table(["#", "件名", "担当"], drows)
+    return f"<h2>📊 週次：反復（スプリント）の健康診断 {today}</h2>{t_sum}<h3>今週終わった分</h3>{t_done}" \
+           f"<p>補足：残りの量と反復の残り日数から「このままいくと終わる見込み」を確認。遅れは次の一手を。</p>"
+
+def build_monthly():
+    versions = rm_get(f"/projects/{PROJ}/versions.json").get("versions", [])
+    vrows = []
+    for v in versions:
+        vi = [i for i in all_open if (i.get("fixed_version") or {}).get("id") == v["id"]]
+        done = sum(1 for i in vi if i["status"]["name"] in ("終了","完了"))
+        ratio = done/len(vi) if vi else 0
+        vrows.append([v["name"], f"{done}/{len(vi)}", v.get("due_date",""),
+                      f"<code>{bar(ratio)}</code>"])
+    t_ver = html_table(["バージョン", "完了/全", "期日", "図解"], vrows)
+    # KPIはRedmine外（KPI・OKRトラッキング.md）から流し込んでもよい。TODO。
+    return f"<h2>📈 月次レポート {today}</h2><h3>リリース/バージョン進捗</h3>{t_ver}" \
+           f"<p>補足：KPIの現在値・工数予実は KPI/コスト予実テンプレから補完。次月方針を1行。</p>"
+
+# 成果デモ会(review)・ふりかえり(retro)はセレモニー様式（ここでは簡易）
+def build_review():
+    closed = [i for i in all_open if i["status"]["name"] in ("終了","完了")]
+    rows = [[f'#{i["id"]}', i["subject"], (i.get("assigned_to") or {}).get("name","")] for i in closed[:20]]
+    return f"<h2>🎬 成果デモ会（スプリントレビュー） {today}</h2>" \
+           f"<h3>今回の反復で完了した分</h3>{html_table(['#','件名','担当'], rows)}" \
+           f"<p>補足：次の反復の狙いを1行で。KPIへの寄与は関係者向けに。</p>"
+def build_retro():
+    return f"<h2>🔄 ふりかえり（レトロスペクティブ） {today}</h2>" \
+           f"<p>素材：docs/08_ふりかえり/ ＋ メトリクス。点検結果と改善1〜3（誰が/いつまでに/どうなれば）を表で。<b>個人評価に使わない</b>。</p>"
+
+BUILDERS = {"daily": build_daily, "weekly": build_weekly, "monthly": build_monthly,
+            "review": build_review, "retro": build_retro}
+TITLES   = {"daily":"📅 朝会メモ（デイリー）","weekly":"📊 週次：反復の健康診断",
+            "monthly":"📈 月次：傾向と健康度","review":"🎬 成果デモ会","retro":"🔄 ふりかえり"}
+
+def to_teams(title, link=None):
+    # Teams Incoming Webhook(MessageCard)。表はTeamsで崩れやすいので要点＋文字バー＋リンク。
+    digest = (f"**{title}**\n\n"
+              + "\n".join(f"- {k}: {v}  `{bar(v/maxc)}`" for k, v in board.items()))
+    if link: digest += f"\n\n▶ 詳細（定例チケット）: {link}"
+    payload = {"@type":"MessageCard","@context":"http://schema.org/extensions",
+               "summary":title,"themeColor":"0E9F9F","title":title,"text":digest}
+    requests.post(os.environ["TEAMS_WEBHOOK_URL"], json=payload, timeout=30).raise_for_status()
+
+def post_ticket_comment(issue_id, body):
+    # 定例チケットにコメント（notes）として貼る＝会議の記録に残す
+    requests.put(f"{URL}/issues/{issue_id}.json", headers=H, timeout=30,
+                 json={"issue":{"notes": body}}).raise_for_status()
+
+def save_md(rtype, title):
+    """★原本はリポジトリのmdに保存（docs-as-code・1情報1正本）。CIが後でcommitする。
+       チャット/チケットはこの原本から作る派生ビュー。"""
+    os.makedirs("docs/報告", exist_ok=True)
+    path = f"docs/報告/報告_{rtype}_{today}.md"
+    # board を markdown 表で（文字バーはmdでもそのまま読める）
+    lines = [f"# {title} {today}", "", "| 状態 | 件数 | 図解 |", "|---|---|---|"]
+    lines += [f"| {k} | {v} | `{bar(v/maxc)}` |" for k, v in board.items()]
+    lines += ["", "> ※ 詳細様式は docs/templates/自動報告_レポート様式.md。",
+              "> HTMLが要る送信先（メール/Wiki）だけ md→HTML に整形する。"]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return path
+
+def put_wiki(title, text):
+    # Redmine Wikiページを上書き（KPIダッシュボード等）。Textile/Markdownは設定に従う。
+    requests.put(f"{URL}/projects/{PROJ}/wiki/{title}.json", headers=H, timeout=30,
+                 json={"wiki_page":{"text": text}}).raise_for_status()
+
+def kpi_dashboard_md():
+    """KPIダッシュボード本文（md/Textile）。自動算出KPI＋業務KPIの両方。"""
+    closed = [i for i in all_open if i["status"]["name"] in ("終了","完了")]
+    done_pt = sum(POINTS.get(cf(i, SIZE_FIELD_NAME), 0) for i in closed)
+    done_n  = len(closed)
+    total_n = len(all_open)
+    prog    = done_n / total_n if total_n else 0
+    # ① 自動算出KPI（PMツールから）
+    auto = ["## 自動算出（PMツール）", "| KPI | 現在値 | 図解 |", "|---|---|---|",
+            f"| 進む速さ（ベロシティ・今反復の完了pt） | {done_pt}pt | |",
+            f"| 完了件数 | {done_n}/{total_n} | `{bar(prog)}` |",
+            f"| 進捗率 | {round(prog*100)}% | `{bar(prog)}` |",
+            "| リードタイム（着手→完了の平均日数） | TODO（created/closed日から算出） | |",
+            "| 工数 予実（予定 vs 実績） | TODO（estimated_hours と time_entries） | |"]
+    # ② 業務KPI（人が測る）＝KPI・OKRトラッキング.md を読む。未更新なら「未更新」
+    # TODO: docs/templates(or docs/)/KPI・OKRトラッキング.md をパースして 目標→現在→差分 を出す。
+    biz = ["", "## 業務KPI（①で定めた価値・人が更新）",
+           "| KPI | 目標 | 現在 | 差分 |", "|---|---|---|---|",
+           "| 見積り作成時間 | 5分 | {{未更新}} | {{ }} |"]
+    head = [f"h1. KPIダッシュボード（{today} 更新）", "",
+            "> 原本：repoの docs/templates/KPI・OKRトラッキング.md ／ これは自動更新の表示ビュー。", ""]
+    return "\n".join(head + auto + biz)
+
+def update_kpi_wiki():
+    text = kpi_dashboard_md()
+    if DRY:
+        print(f"--- DRY RUN (KPI Wiki) ---\n{text}\n---"); return
+    # 原本mdも残す（docs-as-code）
+    os.makedirs("docs/報告", exist_ok=True)
+    with open(f"docs/報告/KPIダッシュボード_{today}.md","w",encoding="utf-8") as f:
+        f.write(text)
+    put_wiki("KPIダッシュボード", text)   # Wikiを毎日上書き（派生ビュー）
+    print("KPIダッシュボード更新")
+
+def due_meetings():
+    """今日が開催日(due_date)の定例チケットを返す [(id, report_type, url), ...]"""
+    data = rm_get("/issues.json", project_id=PROJ, status_id="open",
+                  due_date=today)   # TODO: tracker_id=<定例> で絞ると確実
+    out = []
+    for i in data.get("issues", []):
+        if i.get("tracker",{}).get("name") != MEETING_TRACKER:
+            continue
+        rtype = SHUBETSU_TO_TYPE.get(cf(i, SHUBETSU_FIELD))
+        if rtype:
+            out.append((i["id"], rtype, f"{URL}/issues/{i['id']}"))
+    return out
+
+def emit(rtype, ticket_id=None, link=None):
+    html = BUILDERS[rtype]()
+    title = TITLES[rtype]
+    md_path = save_md(rtype, title)       # ★まず原本mdを保存（正本）
+    if DRY:
+        print(f"--- DRY RUN ({rtype}, ticket={ticket_id}) 原本={md_path} ---\n{html}\n---")
+        return
+    if ticket_id:                         # 定例チケットにコメント（会議の記録）＝原本の派生
+        post_ticket_comment(ticket_id, html)
+    if os.environ.get("TEAMS_WEBHOOK_URL"):
+        to_teams(title, link)             # チャットには要点＋チケットURL（原本リンクでも可）
+    # TODO: メール(SMTP)／Redmine Wiki への書き戻しも必要なら原本mdから整形して追加
+    print(f"sent: {rtype} (ticket={ticket_id}) 原本={md_path}")
+
+# ---- 実行 ----------------------------------------------------------------
+# KPIダッシュボードは毎tick（毎日）Wikiを上書き更新（“日々の状況を表示”）
+if MODE in ("meetings", "kpi", "daily"):
+    update_kpi_wiki()
+
+if MODE == "meetings":
+    meetings = due_meetings()
+    if not meetings:
+        print("本日が開催日の定例チケットなし。レポート送信はなし（KPIダッシュボードは更新済み）。")
+    for issue_id, rtype, link in meetings:
+        emit(rtype, ticket_id=issue_id, link=link)
+elif MODE != "kpi":                       # 方式A：固定種別で1本（kpi単独なら送らない）
+    emit(MODE if MODE in BUILDERS else "weekly")

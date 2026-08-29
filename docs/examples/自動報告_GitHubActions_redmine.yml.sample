@@ -1,0 +1,71 @@
+# 自動報告ワークフロー（GitHub Actions × Redmine） サンプル
+# 置き場所: リポジトリの .github/workflows/auto-report.yml にコピーして使う
+# 役割: 「起動役（スケジューラ）」。中身の読み取りは Redmine REST API、送信は Webhook。
+#   → GitHub は“定期起動する箱”。PM管理が Redmine(GitHub以外)でも、APIで読むので問題なく動く。
+#
+# ★チーム運用の鉄則: 自動送信は「この1リポジトリのActions」=1ランナーに集約する。
+#   各メンバーのPCでcronを回さない（多重送信・シークレット散在を防ぐ）。
+#
+# 必要なSecrets（Settings > Secrets and variables > Actions に登録。値はコミットしない）:
+#   REDMINE_URL          例: https://xxxx.myredmine.jp
+#   REDMINE_API_KEY      Redmineの個人APIキー（管理者推奨。読み取り専用権限が望ましい）
+#   REDMINE_PROJECT      プロジェクト識別子（例: chosa-shien）
+#   TEAMS_WEBHOOK_URL    送信先（Teams Incoming Webhook）。Slackなら SLACK_WEBHOOK_URL
+#   （メール送信する場合）SMTP_HOST / SMTP_USER / SMTP_PASS / MAIL_TO など
+
+name: auto-report
+on:
+  schedule:
+    # 注: GitHub Actions の cron は UTC。JSTは -9時間して書く。
+    #
+    # ★方式B（推奨）：定例チケット駆動。
+    #   毎営業日にtickし、Redmineで「今日が開催日の定例チケット」を探して、
+    #   その種別（朝会/週次/月次/レビュー/レトロ）に合うレポートを出す。
+    #   → 日程の正本はRedmineの定例チケット。ここのcronは"見にいく頻度"だけ。
+    - cron: "30 23 * * 0-4"  # 毎営業日 朝8:30 JST に定例チェック（UTC 前日23:30, 日-木）
+    #
+    # （方式A：定例チケットを使わず日程をここに直書きする場合の例。Bと併用しないこと）
+    # - cron: "0 8 * * 5"    # 週次 金17:00 JST
+    # - cron: "0 1 1 * *"    # 月次 毎月1日 10:00 JST
+  workflow_dispatch:          # 手動実行（初回ドライラン用）
+    inputs:
+      mode:        { description: "meetings(定例チェック) / daily / weekly / monthly", default: "meetings" }
+      dry_run:     { description: "true=送信せず本文だけ出力", default: "true" }
+
+jobs:
+  report:
+    runs-on: ubuntu-latest    # Linuxなので Windowsの --ssl-no-revoke 等は不要
+    steps:
+      - uses: actions/checkout@v4   # リポジトリのmd素材（agile-state/KPI等）も使う場合
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+
+      - name: Redmineを読み、表・図解中心のレポートを生成して送信
+        env:
+          REDMINE_URL:       ${{ secrets.REDMINE_URL }}
+          REDMINE_API_KEY:   ${{ secrets.REDMINE_API_KEY }}
+          REDMINE_PROJECT:   ${{ secrets.REDMINE_PROJECT }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          # MODE=meetings なら「今日が開催日の定例チケット」を探して種別ごとに送る（方式B）。
+          # MODE=daily/weekly/monthly なら固定種別で1本（方式A）。
+          MODE:              ${{ github.event.inputs.mode || 'meetings' }}
+          DRY_RUN:           ${{ github.event.inputs.dry_run || 'false' }}
+        run: python scripts/auto_report_redmine.py
+        # スクリプト本体は docs/examples/自動報告_redmine_to_chat.py.sample を
+        # scripts/auto_report_redmine.py にコピーして使う。
+
+      - name: レポートの原本(md)をリポジトリに保存（docs-as-code・1情報1正本）
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          # スクリプトが docs/報告/報告_*.md を書き出す。これを正本として commit。
+          git config user.name  "auto-report[bot]"
+          git config user.email "auto-report@users.noreply.github.com"
+          git add docs/報告/ || true
+          git commit -m "report: ${{ github.run_id }}" || echo "変更なし"
+          git push || echo "push sk略（権限/保護ブランチに応じて調整）"
+        # 注：保護ブランチなら専用ブランチ or 別repoに保存する等、運用に合わせる。
+
+# 初回は: Actionsタブ > auto-report > Run workflow（report_type=weekly, dry_run=true）で
+#   本文・宛先・整形を人が確認 → OKならスケジュールに任せる（ステップ6:ドライラン）。
