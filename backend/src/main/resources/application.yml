@@ -1,0 +1,5 @@
+documentview:
+  conversion:
+    # soffice 実行ファイルへのパス。PATH が通っていれば "soffice" のままでよい
+    soffice-path: soffice
+    timeout-seconds: 60
